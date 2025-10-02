@@ -7,11 +7,11 @@ import (
 
 type DebugMessager struct{}
 
-func (d *DebugMessager) Broadcast(msg string) {
+func (d *DebugMessager) Broadcast(msg any) {
 	log.Println("[Broadcast]", msg)
 }
 
-func (d *DebugMessager) Message(msg string, playerID int) {
+func (d *DebugMessager) Message(msg any, playerID int) {
 	log.Printf("[Player %d] %s\n", playerID, msg)
 }
 

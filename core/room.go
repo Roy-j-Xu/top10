@@ -25,8 +25,8 @@ const (
 )
 
 type Messager interface {
-	Broadcast(msg string)
-	Message(msg string, playerID int)
+	Broadcast(msg any)
+	Message(msg any, playerID int)
 }
 
 type Room struct {
@@ -99,6 +99,14 @@ func (room *Room) Broadcast(msg string) {
 	for _, msgr := range room.Messagers {
 		msgr.Broadcast(msg)
 	}
+}
+
+func (room *Room) Lock() {
+	room.mutex.Lock()
+}
+
+func (room *Room) Unlock() {
+	room.mutex.Unlock()
 }
 
 func (room *Room) Print() {
