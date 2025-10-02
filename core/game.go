@@ -1,8 +1,9 @@
 package core
 
 import (
+	"fmt"
 	"log"
-	"math/rand"
+	"strings"
 )
 
 func (room *Room) Run() {
@@ -20,6 +21,7 @@ func (room *Room) Run() {
 			room.NextRound()
 			room.Wait()
 		case Finished:
+			return
 		}
 	}
 }
@@ -46,30 +48,18 @@ func (room *Room) Wait() {
 }
 
 func (room *Room) NextRound() {
-	room.Questions = RandomQuestions(4)
-	assignNumber(room.Players, room.Size())
 	room.GuesserID = (room.GuesserID + 1) % room.Size()
+	room.Messager.Broadcast(fmt.Sprint("Gusser: player ", room.GuesserID))
+
+	room.Questions = RandomQuestions(4)
+	room.Messager.Message(strings.Join(room.Questions, "\n"), room.GuesserID)
+
+	room.assignNumbers()
 }
 
-func assignNumber(players []*Player, size int) {
-	for i, k := range randomKFromN(size, 10) {
-		players[i].Number = k
+func (room *Room) assignNumbers() {
+	for playerID, k := range randomKFromN(room.Size(), 10) {
+		room.Players[playerID].Number = k
+		room.Messager.Message(fmt.Sprint("Your number: ", k), playerID)
 	}
-}
-
-func randomKFromN(k, n int) []int {
-	if k > n {
-		panic("k greater than n")
-	}
-
-	nums := make([]int, n)
-	for i := range n {
-		nums[i] = i
-	}
-
-	rand.Shuffle(n, func(i, j int) {
-		nums[i], nums[j] = nums[j], nums[i]
-	})
-
-	return nums[:k]
 }

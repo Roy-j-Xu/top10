@@ -13,7 +13,7 @@ func TestRandomQuestion(t *testing.T) {
 
 func TestRoomWait(t *testing.T) {
 	core.LoadQuestionSet()
-	room := core.NewRoom()
+	room := core.NewRoom(nil)
 
 	go room.Run()
 
@@ -29,5 +29,5 @@ func TestRoomWait(t *testing.T) {
 	room.ReadyPlayer(1)
 
 	<-time.After(1 * time.Second)
-	t.Log(room.Status)
+	room.Print()
 }
