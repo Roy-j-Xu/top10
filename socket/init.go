@@ -34,7 +34,11 @@ func wsHandler(room *core.Room, w http.ResponseWriter, r *http.Request) {
 }
 
 func handlePlayerMessages(room *core.Room, player *core.Player) {
-	defer player.Conn.Close()
+	log.Printf("Listening for messages from player %d", player.ID)
+	defer func() {
+		log.Printf("Closing connection for player %d", player.ID)
+		player.Conn.Close()
+	}()
 
 	for {
 		var msg map[string]string

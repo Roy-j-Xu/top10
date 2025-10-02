@@ -57,8 +57,7 @@ func NewRoom(msgrs []Messager) *Room {
 }
 
 func (room *Room) AddPlayer(player *Player) {
-	room.mutex.Lock()
-	defer room.mutex.Unlock()
+	room.Lock()
 
 	if room.Size() > 10 {
 		return
@@ -67,6 +66,8 @@ func (room *Room) AddPlayer(player *Player) {
 	player.ID = room.Size()
 
 	room.Players = append(room.Players, player)
+
+	room.Unlock()
 
 	room.Broadcast(fmt.Sprintf("Player %d joined", player.ID))
 }
