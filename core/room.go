@@ -2,6 +2,7 @@ package core
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 	"sync"
@@ -34,7 +35,7 @@ type Room struct {
 	GuesserID int
 	Status    Status
 
-	Messager Messager
+	Messagers []Messager
 
 	readyChan    chan int
 	continueChan chan bool
@@ -42,14 +43,14 @@ type Room struct {
 	mutex sync.Mutex
 }
 
-func NewRoom(msgr Messager) *Room {
-	if msgr == nil {
-		msgr = &DebugMessager{}
+func NewRoom(msgrs []Messager) *Room {
+	if msgrs == nil {
+		msgrs = []Messager{&DebugMessager{}}
 	}
 	return &Room{
 		Players:      []*Player{},
 		Status:       Waiting,
-		Messager:     msgr,
+		Messagers:    msgrs,
 		readyChan:    make(chan int, 10),
 		continueChan: make(chan bool, 1),
 	}
@@ -66,6 +67,8 @@ func (room *Room) AddPlayer(player *Player) {
 	player.ID = room.Size()
 
 	room.Players = append(room.Players, player)
+
+	room.Broadcast(fmt.Sprintf("Player %d joined", player.ID))
 }
 
 func (room *Room) Size() int {
@@ -77,12 +80,25 @@ func (room *Room) ReadyPlayer(playerID int) error {
 		return errors.New("player does not exist")
 	}
 	room.readyChan <- playerID
+	room.Broadcast(fmt.Sprintf("Player %d ready", playerID))
 	return nil
 }
 
 func (room *Room) SetStatus(status Status) {
 	log.Printf("Game status: %s -> %s", room.Status, status)
 	room.Status = status
+}
+
+func (room *Room) Message(msg string, playerID int) {
+	for _, msgr := range room.Messagers {
+		msgr.Message(msg, playerID)
+	}
+}
+
+func (room *Room) Broadcast(msg string) {
+	for _, msgr := range room.Messagers {
+		msgr.Broadcast(msg)
+	}
 }
 
 func (room *Room) Print() {

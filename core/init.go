@@ -2,7 +2,7 @@ package core
 
 var r *Room
 
-func InitCore(msgr Messager) {
-	r = NewRoom(msgr)
+func InitCore(msgrs []Messager) {
+	r = NewRoom(msgrs)
 	LoadQuestionSet()
 }

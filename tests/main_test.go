@@ -11,9 +11,9 @@ func TestRandomQuestion(t *testing.T) {
 	t.Log(core.RandomQuestions(4))
 }
 
-func TestRoomWait(t *testing.T) {
+func TestRun(t *testing.T) {
 	core.LoadQuestionSet()
-	room := core.NewRoom(nil)
+	room := core.NewRoom(nil) // use debug messager
 
 	go room.Run()
 
@@ -22,12 +22,8 @@ func TestRoomWait(t *testing.T) {
 	room.AddPlayer(&core.Player{})
 
 	room.ReadyPlayer(0)
+	room.ReadyPlayer(1)
 	room.ReadyPlayer(2)
 
-	t.Log(room.Status)
-
-	room.ReadyPlayer(1)
-
 	<-time.After(1 * time.Second)
-	room.Print()
 }
