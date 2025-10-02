@@ -1,8 +1,8 @@
-package logic
+package core
 
 var r *Room
 
-func InitLogic() {
+func InitCore() {
 	r = NewRoom()
 	LoadQuestionSet()
 }

@@ -1,8 +1,7 @@
 package main
 
-import "top10/logic"
+import "top10/core"
 
 func main() {
-	logic.InitLogic()
-	print(logic.RandomQuestion())
+	core.InitCore()
 }
