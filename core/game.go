@@ -71,10 +71,10 @@ func (room *Room) Wait() {
 
 func (room *Room) NextRound() {
 	room.GuesserID = (room.GuesserID + 1) % room.Size()
-	room.Broadcast(fmt.Sprint("Gusser: player ", room.GuesserID))
+	room.Broadcast(fmt.Sprint("Gusser: player ", room.GuesserID), Broadcast)
 
 	room.Questions = RandomQuestions(4)
-	room.Message(strings.Join(room.Questions, "\n"), room.GuesserID)
+	room.Message(strings.Join(room.Questions, "\n"), room.GuesserID, Questions)
 
 	room.assignNumbers()
 }
@@ -82,6 +82,6 @@ func (room *Room) NextRound() {
 func (room *Room) assignNumbers() {
 	for playerID, k := range randomKFromN(room.Size(), 10) {
 		room.Players[playerID].Number = k
-		room.Message(fmt.Sprint("Your number: ", k), playerID)
+		room.Message(fmt.Sprint("Your number: ", k), playerID, AssignNumber)
 	}
 }

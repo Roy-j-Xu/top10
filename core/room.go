@@ -24,11 +24,6 @@ const (
 	Finished Status = "Finished"
 )
 
-type Messager interface {
-	Broadcast(msg any)
-	Message(msg any, playerID int)
-}
-
 type Room struct {
 	Players   []*Player
 	Questions []string
@@ -74,7 +69,7 @@ func (room *Room) AddPlayerSync(player *Player) {
 	room.Players = append(room.Players, player)
 
 	// avoid locking
-	go room.Broadcast(fmt.Sprintf("Player %d joined", player.ID))
+	go room.Broadcast(fmt.Sprintf("Player %d joined", player.ID), Broadcast)
 }
 
 func (room *Room) Size() int {
@@ -92,7 +87,7 @@ func (room *Room) ReadyPlayerSync(playerID int) error {
 		return errors.New("player does not exist")
 	}
 	room.readyChan <- playerID
-	go room.Broadcast(fmt.Sprintf("Player %d ready", playerID))
+	go room.Broadcast(fmt.Sprintf("Player %d ready", playerID), Broadcast)
 	return nil
 }
 
@@ -104,15 +99,15 @@ func (room *Room) SetStatus(status Status) {
 	room.Status = status
 }
 
-func (room *Room) Message(msg string, playerID int) {
+func (room *Room) Message(msg string, playerID int, msgType MessageType) {
 	for _, msgr := range room.Messagers {
-		msgr.Message(msg, playerID)
+		msgr.Message(msg, playerID, msgType)
 	}
 }
 
-func (room *Room) Broadcast(msg string) {
+func (room *Room) Broadcast(msg string, msgType MessageType) {
 	for _, msgr := range room.Messagers {
-		msgr.Broadcast(msg)
+		msgr.Broadcast(msg, msgType)
 	}
 }
 

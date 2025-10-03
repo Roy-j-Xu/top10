@@ -9,21 +9,14 @@ type WebSocketMessager struct {
 	Room *core.Room
 }
 
-type MessageType string
-
-type Message struct {
-	Type MessageType
-	Msg  any
-}
-
-func (w *WebSocketMessager) Broadcast(msg any) {
+func (w *WebSocketMessager) Broadcast(msg any, msgType core.MessageType) {
 	w.Room.Lock()
 	defer w.Room.Unlock()
 
 	for _, p := range w.Room.Players {
 		if p.Conn != nil {
-			if err := p.Conn.WriteJSON(Message{
-				Type: "broadcast",
+			if err := p.Conn.WriteJSON(core.Message{
+				Type: msgType,
 				Msg:  msg,
 			}); err != nil {
 				log.Printf("Error sending to player %d: %v", p.ID, err)
@@ -32,14 +25,14 @@ func (w *WebSocketMessager) Broadcast(msg any) {
 	}
 }
 
-func (w *WebSocketMessager) Message(msg any, playerID int) {
+func (w *WebSocketMessager) Message(msg any, playerID int, msgType core.MessageType) {
 	w.Room.Lock()
 	defer w.Room.Unlock()
 
 	for _, p := range w.Room.Players {
 		if p.ID == playerID && p.Conn != nil {
-			if err := p.Conn.WriteJSON(Message{
-				Type: "broadcast",
+			if err := p.Conn.WriteJSON(core.Message{
+				Type: msgType,
 				Msg:  msg,
 			}); err != nil {
 				log.Printf("Error sending to player %d: %v", p.ID, err)

@@ -15,6 +15,12 @@ socket.onmessage = (event) => {
 
   const msgObj = JSON.parse(event.data);
 
+  switch (msgObj["Type"]) {
+    case "broadcast":
+      break
+    case "questions":
+  }
+
   log.innerText = msgObj["Msg"];
 }
 
