@@ -70,6 +70,7 @@ func (room *Room) AddPlayerSync(player *Player) {
 
 	// avoid locking
 	go room.Broadcast(fmt.Sprintf("Player %d joined", player.ID), Broadcast)
+	go room.Message(player.ID, player.ID, Joined)
 }
 
 func (room *Room) Size() int {
@@ -87,7 +88,6 @@ func (room *Room) ReadyPlayerSync(playerID int) error {
 		return errors.New("player does not exist")
 	}
 	room.readyChan <- playerID
-	go room.Broadcast(fmt.Sprintf("Player %d ready", playerID), Broadcast)
 	return nil
 }
 
@@ -99,13 +99,13 @@ func (room *Room) SetStatus(status Status) {
 	room.Status = status
 }
 
-func (room *Room) Message(msg string, playerID int, msgType MessageType) {
+func (room *Room) Message(msg any, playerID int, msgType MessageType) {
 	for _, msgr := range room.Messagers {
 		msgr.Message(msg, playerID, msgType)
 	}
 }
 
-func (room *Room) Broadcast(msg string, msgType MessageType) {
+func (room *Room) Broadcast(msg any, msgType MessageType) {
 	for _, msgr := range room.Messagers {
 		msgr.Broadcast(msg, msgType)
 	}

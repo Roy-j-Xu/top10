@@ -2,8 +2,6 @@ package core
 
 import (
 	"fmt"
-	"log"
-	"strings"
 )
 
 func (room *Room) Run() {
@@ -37,12 +35,12 @@ func (room *Room) WaitSync() {
 		if !playerReady[playerID] {
 			playerReady[playerID] = true
 			numOfReady++
-			log.Printf("Player %d ready (%d of %d)", playerID, numOfReady, roomSize)
+			room.Broadcast(fmt.Sprintf("Player %d ready", playerID), Broadcast)
 		}
 
 		if numOfReady == roomSize {
 			room.continueChan <- true
-			log.Println("All players ready, game continues")
+			room.Broadcast("All players ready, game starts", Broadcast)
 			return
 		}
 	}
@@ -58,25 +56,23 @@ func (room *Room) Wait() {
 		if !playerReady[playerID] {
 			playerReady[playerID] = true
 			numOfReady++
-			log.Printf("Player %d ready (%d of %d)", playerID, numOfReady, room.Size())
+			room.Broadcast(fmt.Sprintf("Player %d ready", playerID), Broadcast)
 		}
 
 		if numOfReady == room.Size() {
 			room.continueChan <- true
-			log.Println("All players ready, game continues")
+			room.Broadcast("All players ready, game continues", Broadcast)
 			return
 		}
 	}
 }
 
 func (room *Room) NextRound() {
-	room.GuesserID = (room.GuesserID + 1) % room.Size()
-	room.Broadcast(fmt.Sprint("Gusser: player ", room.GuesserID), Broadcast)
-
-	room.Questions = RandomQuestions(4)
-	room.Message(strings.Join(room.Questions, "\n"), room.GuesserID, Questions)
+	room.generateQuestions()
 
 	room.assignNumbers()
+
+	room.GuesserID = (room.GuesserID + 1) % room.Size()
 }
 
 func (room *Room) assignNumbers() {
@@ -84,4 +80,12 @@ func (room *Room) assignNumbers() {
 		room.Players[playerID].Number = k
 		room.Message(fmt.Sprint("Your number: ", k), playerID, AssignNumber)
 	}
+}
+
+func (room *Room) generateQuestions() {
+	room.Questions = RandomQuestions(4)
+	room.Broadcast(QuestionsMsg{
+		Questions: room.Questions,
+		Guesser:   room.GuesserID,
+	}, Questions)
 }

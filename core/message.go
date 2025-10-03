@@ -1,18 +1,28 @@
 package core
 
-import "log"
+import (
+	"encoding/json"
+	"log"
+)
 
 type MessageType string
 
 const (
-	Questions    MessageType = "questions"
-	AssignNumber MessageType = "number"
+	Joined       MessageType = "joined"
 	Broadcast    MessageType = "broadcast"
+	Questions    MessageType = "questions"
+	Ready        MessageType = "ready"
+	AssignNumber MessageType = "assign-number"
 )
 
 type Message struct {
 	Type MessageType
 	Msg  any
+}
+
+type QuestionsMsg struct {
+	Questions []string
+	Guesser   int
 }
 
 type Messager interface {
@@ -23,9 +33,17 @@ type Messager interface {
 type DebugMessager struct{}
 
 func (d *DebugMessager) Broadcast(msg any, msgType MessageType) {
-	log.Printf("[Broadcast] (%s) %s", msgType, msg)
+	data, err := json.Marshal(msg)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	log.Printf("[Broadcast] (%s) %s", msgType, data)
 }
 
 func (d *DebugMessager) Message(msg any, playerID int, msgType MessageType) {
-	log.Printf("[Player %d] (%s) %s\n", playerID, msgType, msg)
+	data, err := json.Marshal(msg)
+	if err != nil {
+		log.Println(err.Error())
+	}
+	log.Printf("[Player %d] (%s) %s\n", playerID, msgType, string(data))
 }

@@ -18,7 +18,9 @@ func main() {
 	serveFrontend()
 
 	log.Println("Server started")
-	http.ListenAndServe("0.0.0.0:8080", nil)
+	err := http.ListenAndServe("0.0.0.0:8080", nil)
+
+	log.Println(err.Error())
 }
 
 func serveFrontend() {
