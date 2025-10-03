@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"top10/core"
 	"top10/socket"
@@ -15,7 +16,8 @@ func main() {
 
 	serveFrontend()
 
-	http.ListenAndServe("0.0.0.0:2357", nil)
+	log.Println("Server started")
+	http.ListenAndServe("0.0.0.0:8080", nil)
 }
 
 func serveFrontend() {

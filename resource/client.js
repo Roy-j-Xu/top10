@@ -1,4 +1,5 @@
-const socket = new WebSocket("ws://localhost:2357/ws");
+const host = window.location.hostname;
+const socket = new WebSocket(`ws://${host}:8080/ws`);
 
 const log = document.getElementById("log");
 const readyBtn = document.getElementById("readyBtn")
