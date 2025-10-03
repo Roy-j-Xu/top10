@@ -17,13 +17,13 @@ func TestRun(t *testing.T) {
 
 	go room.Run()
 
-	room.AddPlayer(&core.Player{})
-	room.AddPlayer(&core.Player{})
-	room.AddPlayer(&core.Player{})
+	room.AddPlayerSync(&core.Player{})
+	room.AddPlayerSync(&core.Player{})
+	room.AddPlayerSync(&core.Player{})
 
-	room.ReadyPlayer(0)
-	room.ReadyPlayer(1)
-	room.ReadyPlayer(2)
+	room.ReadyPlayerSync(0)
+	room.ReadyPlayerSync(1)
+	room.ReadyPlayerSync(2)
 
 	<-time.After(1 * time.Second)
 }

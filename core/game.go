@@ -8,7 +8,7 @@ import (
 
 func (room *Room) Run() {
 	room.SetStatus(Waiting)
-	room.Wait()
+	room.WaitSync()
 	for {
 		<-room.continueChan
 		switch room.Status {
@@ -21,6 +21,28 @@ func (room *Room) Run() {
 			room.NextRound()
 			room.Wait()
 		case Finished:
+			return
+		}
+	}
+}
+
+// Wait for everyone to join with AddPlayerSync
+func (room *Room) WaitSync() {
+	numOfReady := 0
+	playerReady := make(map[int]bool)
+
+	for {
+		playerID := <-room.readyChan
+		roomSize := room.SizeSync()
+		if !playerReady[playerID] {
+			playerReady[playerID] = true
+			numOfReady++
+			log.Printf("Player %d ready (%d of %d)", playerID, numOfReady, roomSize)
+		}
+
+		if numOfReady == roomSize {
+			room.continueChan <- true
+			log.Println("All players ready, game continues")
 			return
 		}
 	}

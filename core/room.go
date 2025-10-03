@@ -56,36 +56,50 @@ func NewRoom(msgrs []Messager) *Room {
 	}
 }
 
-func (room *Room) AddPlayer(player *Player) {
+func (room *Room) AddPlayerSync(player *Player) {
 	room.Lock()
+	defer room.Unlock()
 
-	if room.Size() > 10 {
+	if room.Status != Waiting {
 		return
 	}
 
+	// do not use room.SizeSync, otherwise deadlock
 	player.ID = room.Size()
+
+	if player.ID > 10 {
+		return
+	}
 
 	room.Players = append(room.Players, player)
 
-	room.Unlock()
-
-	room.Broadcast(fmt.Sprintf("Player %d joined", player.ID))
+	// avoid locking
+	go room.Broadcast(fmt.Sprintf("Player %d joined", player.ID))
 }
 
 func (room *Room) Size() int {
 	return len(room.Players)
 }
 
-func (room *Room) ReadyPlayer(playerID int) error {
-	if playerID < 0 || playerID > room.Size() {
+func (room *Room) SizeSync() int {
+	room.Lock()
+	defer room.Unlock()
+	return len(room.Players)
+}
+
+func (room *Room) ReadyPlayerSync(playerID int) error {
+	if playerID < 0 || playerID >= room.SizeSync() {
 		return errors.New("player does not exist")
 	}
 	room.readyChan <- playerID
-	room.Broadcast(fmt.Sprintf("Player %d ready", playerID))
+	go room.Broadcast(fmt.Sprintf("Player %d ready", playerID))
 	return nil
 }
 
 func (room *Room) SetStatus(status Status) {
+	if room.Status == status {
+		return
+	}
 	log.Printf("Game status: %s -> %s", room.Status, status)
 	room.Status = status
 }

@@ -22,7 +22,7 @@ func randomKFromN(k, n int) []int {
 
 	nums := make([]int, n)
 	for i := range n {
-		nums[i] = i
+		nums[i] = i + 1
 	}
 
 	rand.Shuffle(n, func(i, j int) {

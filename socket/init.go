@@ -28,7 +28,7 @@ func wsHandler(room *core.Room, w http.ResponseWriter, r *http.Request) {
 
 	player := &core.Player{Conn: conn}
 
-	room.AddPlayer(player)
+	room.AddPlayerSync(player)
 
 	go handlePlayerMessages(room, player)
 }
@@ -47,6 +47,6 @@ func handlePlayerMessages(room *core.Room, player *core.Player) {
 			return
 		}
 
-		room.ReadyPlayer(player.ID)
+		room.ReadyPlayerSync(player.ID)
 	}
 }

@@ -11,6 +11,7 @@ func main() {
 	core.InitCore()
 
 	room := core.NewRoom(nil)
+	go room.Run()
 
 	socket.InitSocketHandler(room)
 
