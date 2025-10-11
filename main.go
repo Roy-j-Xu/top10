@@ -4,16 +4,16 @@ import (
 	"log"
 	"net/http"
 	"top10/core"
-	"top10/socket"
+	"top10/core/room"
 )
 
 func main() {
 	core.InitCore()
 
-	room := core.NewRoom(nil)
+	room, err := room.NewRoomDebug("room", 10)
 	go room.Run()
 
-	socket.InitSocketHandler(room)
+	room.InitSocketHandler(room)
 
 	serveFrontend()
 

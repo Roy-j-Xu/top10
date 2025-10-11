@@ -1,5 +1,7 @@
 package core
 
+import "top10/core/game"
+
 func InitCore() {
-	LoadQuestionSet()
+	game.LoadQuestionSet()
 }

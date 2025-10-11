@@ -4,15 +4,15 @@ A surprise gift for your boss. 1 = most awkward, 10 = most impressive.
 
 A new flavor of ice cream. 1 = absolutely disgusting, 10 = irresistibly delicious.
 
-A superhero power you’d want. 1 = most annoying, 10 = most amazing.
+Name a superhero power. 1 = most annoying, 10 = most amazing.
 
-A way to spend a Saturday. 1 = most boring, 10 = most exciting.
+A way to spend a weekend with partner. 1 = most boring, 10 = most exciting.
 
-A pet you’d adopt. 1 = scariest/most troublesome, 10 = cutest/easiest.
+A pet you’d adopt. 1 = weird, 10 = cutest.
 
 A place for a first date. 1 = most awkward, 10 = most romantic.
 
-A nickname your friends could give you. 1 = most embarrassing, 10 = coolest.
+Give me a nickname. 1 = most embarrassing, 10 = coolest.
 
 A movie to watch alone at night. 1 = scariest/creepiest, 10 = most heartwarming.
 
@@ -20,27 +20,23 @@ A dish to bring to a potluck. 1 = most inedible, 10 = most delicious.
 
 A way to respond to a bad text. 1 = most polite, 10 = most savage.
 
-A hobby to list on your CV. 1 = most boring/confusing, 10 = most impressive.
+A skill to list on your CV. 1 = most confusing, 10 = most impressive.
 
-A celebrity to be stranded with on a desert island. 1 = worst, 10 = best.
-
-A hairstyle to try for one week. 1 = ugliest, 10 = trendiest.
+What do you do during job interview to impress the interviewers? 1 = confusing, 10 = impressive.
 
 A costume for Halloween. 1 = most ridiculous, 10 = most terrifying.
 
-A new product in a supermarket aisle. 1 = most useless, 10 = most needed.
+A new product in a supermarket aisle. 1 = most useless, 10 = most wanted.
 
 A text message to accidentally send to your boss. 1 = most harmless, 10 = most embarrassing.
 
-A snack to hide in your desk drawer. 1 = least tasty, 10 = most addictive.
+A snack you hide in your desk drawer as a student. 1 = normal, 10 = weird.
 
 A plot twist in a book/movie. 1 = most predictable, 10 = most shocking.
 
-A pickup line to use at a bar. 1 = most awkward, 10 = most charming.
+A vacation destination. 1 = least attractive, 10 = most amazing.
 
-A vacation destination. 1 = least relaxing, 10 = most amazing.
-
-A gift for your sibling. 1 = most boring, 10 = most thoughtful.
+A gift for your parnter on Valentine's day. 1 = weird, 10 = thoughtful.
 
 A prank to play on a friend. 1 = most harmless, 10 = most elaborate.
 
@@ -54,61 +50,55 @@ A hidden camera filmed your bedroom last night — what did it catch? 1 = least 
 
 Your child was punished at school — what for? 1 = tiniest mistake, 10 = you wish they got punished harder.
 
-You win a weird award — what is it? 1 = meaningless, 10 = wildly prestigious.
+You win an award — what is it? 1 = meaningless, 10 = wildly prestigious.
 
 A text appears on your partner’s phone — what does it say? 1 = harmless, 10 = scandalous.
-
-You’re writing a dating app bio line — what do you put? 1 = bland, 10 = irresistible.
 
 You must give up one modern convenience — which? 1 = least painful, 10 = unbearable.
 
 You’re on a talk show—what anecdote do you tell? 1 = forgettable, 10 = viral-worthy.
 
-You find a time capsule — what’s inside? 1 = pointless, 10 = priceless.
+You opened your time capsule — what’s inside? 1 = pointless, 10 = priceless.
 
-You’re designing a mascot — how embarrassing is it? 1 = not embarrassing, 10 = mortifying.
+You’re designing a mascot for your school/university — what is it? 1 = good, 10 = mortifying.
 
-You’re inventing a new curse word — how offensive? 1 = mild, 10 = nuclear.
-
-A neighbor reports you to the HOA — for what? 1 = trivial, 10 = outrageous.
+A neighbor reports you to the community — for what? 1 = trivial, 10 = outrageous.
 
 You’re choosing a tattoo — how tasteful? 1 = tasteful, 10 = catastrophic.
-
-You get to rename a celebrity — how bad is the new name? 1 = subtle, 10 = meme gold.
 
 You’re asked to sing karaoke — what song do you pick? 1 = safe, 10 = wildly unexpected.
 
 You’re the protagonist of a scandalous headline — how tame or wild? 1 = harmless, 10 = world‑shaking.
 
-A magical wallet appears — what’s inside? 1 = useless, 10 = life-changing.
+Name a magical object. 1 = useless, 10 = life-changing.
 
 You’re forced to live in one fictional universe — how pleasant? 1 = awful, 10 = dream.
 
 You must choose a stranger to babysit your pet — how competent? 1 = excellent, 10 = disaster.
 
-You accidently wear something to work — how embarrassing? 1 = barely noticed, 10 = viral.
+You wear something to work — how embarrassing? 1 = barely noticed, 10 = viral.
 
 You confess a secret on live radio — how trivial or intense? 1 = tiny, 10 = earth‑shattering.
 
-You pick a new signature drink — how gross or delicious? 1 = terrible, 10 = divine.
+You invented a new signature drink — how gross or delicious? 1 = terrible, 10 = divine.
 
 You're choosing a funeral eulogy line — how boring to inspiring? 1 = soporific, 10 = moving.
 
-You’re offered a job from your least-favorite boss — how tempting? 1 = not at all, 10 = can’t refuse.
+You’re offered a job — how tempting? 1 = not at all, 10 = can’t refuse.
 
 A rumor about you spreads — how plausible? 1 = ridiculous, 10 = totally believable.
 
 You see yourself in an embarrassing old photo — how bad? 1 = cute, 10 = appalling.
 
-You must perform a heist — how clever? 1 = amateur, 10 = mastermind.
+You are robbing a bank — how clever? 1 = amateur, 10 = mastermind.
 
-Someone asks for your worst life advice — how awful? 1 = harmless, 10 = catastrophic.
+Give me a life advice. 1 = bad, 10 = good.
 
 You judge a talent show — how strict are you? 1 = lenient, 10 = brutal.
 
 You’re naming a perfume — how classy or trashy? 1 = refined, 10 = ridiculous.
 
-Your grocery list gets published — how normal? 1 = boring, 10 = scandalous.
+Your grocery list gets published — how normal? 1 = boring, 10 = weird.
 
 You give your kid a stage name — how embarrassing? 1 = normal, 10 = cringe.
 
@@ -116,11 +106,9 @@ Your spaceship lands — what’s the first thing you say? 1 = practical, 10 = t
 
 You pick a life motto to be tattooed on billboards — how inspirational? 1 = sweet, 10 = culty.
 
-You must choose a ghostly backstory — how scary? 1 = not scary, 10 = nightmare fuel.
+Create a backstory for a haunted house. 1 = not scary, 10 = nightmare fuel.
 
-The boss asks for your karaoke performance — how professional? 1 = flawless, 10 = trainwreck.
-
-You pick what your future self will regret — how small or huge? 1 = trivial, 10 = catastrophic.
+You did something that hurt your career — how small or huge? 1 = trivial, 10 = catastrophic.
 
 You’re setting a ridiculous world record — how silly? 1 = mildly odd, 10 = absurd.
 
@@ -132,27 +120,25 @@ You’re writing a review of your ex — how polite? 1 = charitable, 10 = scorch
 
 You pick an heirloom to pass down — how precious? 1 = junk, 10 = priceless.
 
-You choose the soundtrack for your life — how dramatic? 1 = calm, 10 = epic opera.
+You choose the soundtrack for your life — how dramatic? 1 = mundane, 10 = dramatic.
 
-You must brag about one childhood achievement — how humble or boastful? 1 = tiny, 10 = unbelievable.
+A childhood achievement to brag about. 1 = tiny, 10 = impressive.
 
 You design a mascot costume you must wear to work — how humiliating? 1 = fine, 10 = humiliating.
 
 You have to eat one food forever — how delicious or awful? 1 = tolerable, 10 = nightmare.
 
-You suggest a therapy method — how legit? 1 = helpful, 10 = pseudoscience.
+You suggest a therapy method — how legit? 1 = helpful, 10 = please let this be illegal.
 
-A stranger offers to tell you one secret — how trivial to life-changing? 1 = trivial, 10 = bombshell.
+Your partner tells you one secret — how trivial to life-changing? 1 = trivial, 10 = bombshell.
 
-You pick an embarrassing ringtone — how mortifying? 1 = mild, 10 = impossible to explain.
+You pick a new ringtone — what is it? 1 = normal, 10 = impossible to explain.
 
 You’re choosing a fake identity — how believable? 1 = flawless, 10 = obvious.
 
-A mysterious letter arrives — how disappointing to thrilling? 1 = dull, 10 = game-changing.
+A mysterious letter arrives — what is it about? 1 = dull, 10 = game-changing.
 
-You name a new fast-food item — how gross or genius? 1 = meh, 10 = unstoppable.
-
-You have to choose a scandalous nickname for a politician — how mild or savage? 1 = tame, 10 = brutal.
+You invented a new fast-food brand — what is it? 1 = questionable, 10 = unstoppable.
 
 You pick a weird side hustle — how respectable? 1 = respectable, 10 = shameful.
 
@@ -170,51 +156,39 @@ You’re asked to create a conspiracy theory — how believable? 1 = silly, 10 =
 
 You must choose a keynote speech topic — how inspiring? 1 = dry, 10 = life-altering.
 
-You’re choosing the weirdest souvenir to bring home — how lame or awesome? 1 = charming, 10 = atrocious.
+You’re bought a souvenir in your holiday — how lame or awesome? 1 = lame, 10 = awesome.
 
-You get to pick a viral challenge — how safe? 1 = harmless, 10 = reckless.
+You create a new viral challenge — how safe? 1 = harmless, 10 = reckless.
 
-You decide the worst color for your wedding dress/suit — how awful? 1 = fine, 10 = fashion crime.
+What are you dressing in your own wedding? 1 = fine, 10 = bad.
 
 You’re writing a parent-teacher note — how defensive? 1 = calm, 10 = furious.
 
-You choose a social media bio line — how humble or flexy? 1 = modest, 10 = obnoxious.
+You must pick an apology gift — how sincere? 1 = instant forgive, 10 = insultingly lazy.
 
-You must pick an apology gift — how sincere? 1 = heartfelt, 10 = insultingly lazy.
-
-You pick a lie you told at work — how believable? 1 = harmless, 10 = catastrophic.
+You pick a lie to not go to work — how believable? 1 = bullshit, 10 = believable.
 
 You design a public art piece — how tasteful? 1 = elegant, 10 = eyesore.
 
-You’re told to pick a name for a scandalous gossip blog — how spicy? 1 = tame, 10 = clickbait gold.
+You’re told to pick a name for a scandalous gossip magazine — how spicy? 1 = tame, 10 = clickbait gold.
 
-You choose how you would sabotage a rival — how petty or diabolical? 1 = tiny, 10 = Machiavellian.
+Your neighborhood is protesting that a local factory ruined the environment — what did it do? 1 = trivial, 10 = disastrous.
 
-You describe your most useless skill — how trivial? 1 = handy, 10 = totally useless.
+A everyday life skill. 1 = handy, 10 = totally useless.
 
 You select an emergency excuse for skipping a wedding — how believable? 1 = solid, 10 = insane.
 
-You must pick a weird law to create — how sensible? 1 = sensible, 10 = bizarre.
-
-You choose a celebrity to narrate your life — how perfect? 1 = no, 10 = ideal.
+You create a new law — how sensible? 1 = sensible, 10 = bizarre.
 
 You pick a bedtime routine — how healthy? 1 = great, 10 = terrible.
 
 You design the worst theme for a child’s party — how awful? 1 = okay, 10 = traumatizing.
 
-You pick the greatest office perk — how small vs huge? 1 = trivial, 10 = dream.
+You arranged the office to make it more lively, what did you do? 1 = unusual, 10 = extraordinary.
 
-You pick a bad movie to be famous for — how legendary? 1 = forgettable, 10 = cult classic.
+You read a message from your fortune cookie — how profound? 1 = corny, 10 = oracle-level.
 
-You must write a fortune cookie message — how profound? 1 = corny, 10 = oracle-level.
-
-You choose an awkward thing you own that you’d never admit — how small to huge? 1 = tiny, 10 = extremely embarrassing.
-
-You pick a café order that defines you — how basic or edgy? 1 = basic, 10 = adventurous.
-
-You choose what your plants would say about you — how harsh? 1 = kind, 10 = savage.
-
-You’re making a revenge playlist — how subtle vs scorched-earth? 1 = quiet, 10 = nuclear.
+You invented a new coffee flavor. 1 = basic, 10 = unusual.
 
 You pick a last-minute travel packing item — how smart? 1 = genius, 10 = pointless.
 
@@ -222,7 +196,7 @@ You decide how dramatic your reaction would be to winning the lottery — 1 = ca
 
 You imagine your obituary headline — how flattering? 1 = bland, 10 = legendary.
 
-You choose a "dealbreaker" trait — how petty? 1 = reasonable, 10 = trivial.
+Your uber driver refused to give you a ride — what is the reason? 1 = reasonable, 10 = unreasonable.
 
 You pick a charity to send a surprise donation to — how meaningful? 1 = superficial, 10 = life-changing.
 
@@ -286,4 +260,56 @@ You choose a ridiculous law you’d happily enforce — 1 = reasonable, 10 = aut
 
 You invent a new school subject — how useful? 1 = practical, 10 = pointless.
 
-You must pick one lie you’ll never tell again — how small or life-changing? 1 = tiny, 10 = monumental.
+Your best friend has been lying to your since beginning — what is it about? 1 = tiny, 10 = monumental.
+
+You see a restaurant review on google map — what is it saying? 1 = bad, 10 = extraordinary.
+
+You are a detective and find an evidence on the crime scene — what is it? 1 = useless, 10 = convincing.
+
+Tell me how do I become more attractive. 1 = reasonable, 10 = unreasonable.
+
+How would you describe yourself in a dating app? 1 = awful, 10 = attractive.
+
+You are all my colleagues and you find out I have been doing something along as extra hour. 1 = normal, 10 = can't tell anyone about it.
+
+Invent a superhero, what is their name and what's their weapon? 1 = lame, 10 = cool.
+
+Name a possible motive for me to murder someone. 1 = not agreeable, 10 = agreeable.
+
+You see your partner take our a little gadget during sex to "spice things up" — what is it? 1 = normal, 10 = shocking.
+
+I as cheated by my partner, inform me how you found out about it. 1 = discreet, 10 = inconsiderate.
+
+You all planned a surprise party for me, but accidentally saw me making out with someone — who was it? 1 = normal, 10 = unbelievable.
+
+Name a keyword for searching for porn. 1 = normal, 10 = wft.
+
+How to release stress? 1 = least common, 10 = common.
+
+Flirt with me. 1 = gross, 10 = sexy.
+
+A place for holding a party. 1 = weird, 10 = great.
+
+You let someone look after your kids — who is it (can be fictional)? 1 = worst choice, 10 = good choice.
+
+You wrote a new book — what is its name? 1 = boring, 10 = everyone wants to read it.
+
+Sometihng to bring to grill party. 1 = normal, 10 = abnormal.
+
+You are staying at your friends house, what personal belongings are you bringing? 1 = normal, 10 = abnormal.
+
+You are wanted by the police and need a place to hide, where would you hide? 1 = easy to be found, 10 = hard to be found.
+
+You asked god one question, what is it? 1 = useful, 10 = wastful.
+
+You are reporting a horrible traffic accident, what are you saying? 1 = inappropriate, 10 = appropriate.
+
+You visit me for the first time and find my room full of ... 1 = expected, 10 = surprising.
+
+You pull something out of water while fishing. 1 = normal, 10 = surprising.
+
+Name a place to meet your lover. 1 = safe, 10 = thrilling.
+
+Pretend you are breaking up with me, what is your reason? 1 = bullshit, 10 = understandable.
+
+Act like you are fighting bad guys. 1 = cowardly, 10 = brave.
