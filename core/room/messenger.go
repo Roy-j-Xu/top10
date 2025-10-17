@@ -10,7 +10,7 @@ type Message struct {
 	Msg  any
 }
 
-type Messager interface {
+type Messenger interface {
 	Broadcast(msg Message)
 	Message(msg Message, playerID string)
 }
@@ -37,9 +37,9 @@ func SystemMsgOf(msgType SystemMsgType, msg any) Message {
 	}
 }
 
-type DebugMessager struct{}
+type DebugMessenger struct{}
 
-func (d *DebugMessager) Broadcast(msg Message) {
+func (d *DebugMessenger) Broadcast(msg Message) {
 	data, err := json.Marshal(msg.Msg)
 	if err != nil {
 		log.Println(err.Error())
@@ -47,7 +47,7 @@ func (d *DebugMessager) Broadcast(msg Message) {
 	log.Printf("[Broadcast] (%s) %s", msg.Type, data)
 }
 
-func (d *DebugMessager) Message(msg Message, playerID string) {
+func (d *DebugMessenger) Message(msg Message, playerID string) {
 	data, err := json.Marshal(msg.Msg)
 	if err != nil {
 		log.Println(err.Error())

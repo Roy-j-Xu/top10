@@ -47,6 +47,16 @@ func (r *Room) GetNumberOfReadiesSync() int {
 	return count
 }
 
+func (r *Room) PlayerExistsAndLeftSync(playerID string) bool {
+	r.Lock()
+	defer r.Unlock()
+	if p, ok := r.Players[playerID]; ok {
+		return p.Left
+	} else {
+		return false
+	}
+}
+
 func (r *Room) UnreadyAllSync() {
 	r.Lock()
 	defer r.Unlock()
@@ -56,13 +66,13 @@ func (r *Room) UnreadyAllSync() {
 }
 
 func (r *Room) Message(msg Message, playerID string) {
-	for _, msgr := range r.Messagers {
+	for _, msgr := range r.Messengers {
 		msgr.Message(msg, playerID)
 	}
 }
 
 func (r *Room) Broadcast(msg Message) {
-	for _, msgr := range r.Messagers {
+	for _, msgr := range r.Messengers {
 		msgr.Broadcast(msg)
 	}
 }

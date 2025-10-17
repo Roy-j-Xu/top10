@@ -26,7 +26,7 @@ type Room struct {
 
 	Players map[string]*Player
 
-	Messagers []Messager
+	Messengers []Messenger
 
 	readyChan chan string
 
@@ -44,22 +44,22 @@ func NewRoomDebug(roomID string, maxSize int) (*Room, error) {
 		return nil, fmt.Errorf("room %s is too large: %w", roomID, ErrInvalidRoom)
 	}
 
-	msgrs := []Messager{&DebugMessager{}}
+	msgrs := []Messenger{&DebugMessenger{}}
 
 	timeout := 10 * time.Minute
 	timer := time.NewTimer(timeout)
 	ctx, cancel := context.WithCancel(context.Background())
 
 	room := &Room{
-		ID:        roomID,
-		MaxSize:   maxSize,
-		Players:   make(map[string]*Player),
-		Messagers: msgrs,
-		readyChan: make(chan string, maxSize),
-		Timer:     timer,
-		Timeout:   timeout,
-		ctx:       ctx,
-		cancel:    cancel,
+		ID:         roomID,
+		MaxSize:    maxSize,
+		Players:    make(map[string]*Player),
+		Messengers: msgrs,
+		readyChan:  make(chan string, maxSize),
+		Timer:      timer,
+		Timeout:    timeout,
+		ctx:        ctx,
+		cancel:     cancel,
 	}
 	go room.ListenToTimeout()
 
@@ -71,7 +71,7 @@ func NewRoomWebSocket(roomID string, maxSize int) (*Room, error) {
 	if err != nil {
 		return nil, err
 	}
-	room.Messagers = append(room.Messagers, &WebSocketMessager{Players: room.Players})
+	room.Messengers = append(room.Messengers, &WebSocketMessenger{Players: room.Players})
 	return room, nil
 }
 

@@ -5,12 +5,12 @@ import (
 	"sync"
 )
 
-type WebSocketMessager struct {
+type WebSocketMessenger struct {
 	Players map[string]*Player
 	mutex   sync.Mutex
 }
 
-func (w *WebSocketMessager) Broadcast(msg Message) {
+func (w *WebSocketMessenger) Broadcast(msg Message) {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	for _, p := range w.Players {
@@ -25,7 +25,7 @@ func (w *WebSocketMessager) Broadcast(msg Message) {
 	}
 }
 
-func (w *WebSocketMessager) Message(msg Message, playerID string) {
+func (w *WebSocketMessenger) Message(msg Message, playerID string) {
 	w.mutex.Lock()
 	defer w.mutex.Unlock()
 	for _, p := range w.Players {

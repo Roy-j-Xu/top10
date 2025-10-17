@@ -15,6 +15,6 @@ func main() {
 }
 
 func serveFrontend() {
-	fs := http.FileServer(http.Dir("./resource"))
+	fs := http.FileServer(http.Dir("./resource/frontend/dist"))
 	http.Handle("/", fs)
 }

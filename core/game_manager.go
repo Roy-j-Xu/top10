@@ -121,7 +121,18 @@ func wsHandler(rm *room.Room, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	rm.AddPlayerSync(playerID, conn)
+	if rm.PlayerExistsAndLeftSync(playerID) {
+		err = rm.RejoinPlayerSync(playerID, conn)
+	} else {
+		err = rm.AddPlayerSync(playerID, conn)
+	}
+
+	if err != nil {
+		log.Println("failed to join:", err)
+		conn.WriteJSON(fmt.Sprint("failed to join", err.Error()))
+		conn.Close()
+		return
+	}
 
 	go handlePlayerMessages(rm, playerID)
 }
