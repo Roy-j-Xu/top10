@@ -1,0 +1,16 @@
+{
+  "name": "top10",
+  "version": "0.0.1",
+  "description": "Frontend for TOP10",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --out-dir ../resource/dist --clean",
+    "watch": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "test": "test"
+  },
+  "author": "Roy-j-Xu",
+  "license": "ISC",
+  "devDependencies": {
+    "tsup": "8.5.0",
+    "typescript": "5.9.3"
+  }
+}
