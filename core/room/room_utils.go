@@ -1,6 +1,7 @@
 package room
 
 import (
+	"context"
 	"log"
 )
 
@@ -126,6 +127,10 @@ func (r *Room) Unlock() {
 
 func (r *Room) Shutdown() {
 	r.cancel()
+}
+
+func (r *Room) StopCtx() context.Context {
+	return r.ctx
 }
 
 func (r *Room) Print() {
