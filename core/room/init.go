@@ -41,20 +41,21 @@ func handlePlayerMessages(room *Room, playerID string) {
 	player := room.Players[playerID]
 	log.Printf("Listening for messages from player %s", player.ID)
 	defer func() {
-		room.SendToPlayerChannel(player.ID, SystemMsgOf(P_LEFT, "player left or hangup"))
+		room.SendToReadyChannel_LEFT(player.ID)
 		player.Conn.Close()
 	}()
 
 	for {
-		var msg map[string]string
+		var msg Message
 		if err := player.Conn.ReadJSON(&msg); err != nil {
 			log.Println("Read error:", err)
 			continue
 		}
 
-		room.SendToPlayerChannel(player.ID, Message{
-			Type: msg["type"],
-			Msg:  msg["msg"],
-		})
+		if msg.Type == string(SP_READY) || msg.Type == string(SP_LEFT) {
+			room.SendToReadyChannel(player.ID, msg)
+		} else {
+			room.SendToPlayerChannel(player.ID, msg)
+		}
 	}
 }

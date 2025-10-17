@@ -1,7 +1,6 @@
 package room
 
 import (
-	"fmt"
 	"log"
 )
 
@@ -71,16 +70,9 @@ func (r *Room) BroadcastError(err error) {
 	r.Broadcast(SystemMsgOf(S_ERROR, err.Error()))
 }
 
-func (r *Room) ListenToTimeout() error {
-	r.Lock()
-	if r.Timer == nil {
-		return fmt.Errorf("unable to find timer in room %s: %w", r.ID, ErrInvalidRoom)
-	}
-	r.Unlock()
-
+func (r *Room) ListenToTimeout() {
 	<-r.Timer.C
 	r.cancel()
-	return nil
 }
 
 func (r *Room) ResetTimerSync() {
@@ -106,12 +98,21 @@ func (r *Room) SendToPlayerChannel(playerID string, msg Message) error {
 	}
 }
 
-func (r *Room) SendToPlayerChannel_READY(playerID string) error {
-	return r.SendToPlayerChannel(playerID, SystemMsgOf(P_READY, "ready"))
+func (r *Room) SendToReadyChannel(playerID string, msg Message) error {
+	if p, err := r.GetPlayerSync(playerID); err == nil {
+		p.readyChan <- msg
+		return nil
+	} else {
+		return ErrPlayerNotFound
+	}
 }
 
-func (r *Room) SendToPlayerChannel_LEFT(playerID string) error {
-	r.SendToPlayerChannel(playerID, SystemMsgOf(P_LEFT, "left"))
+func (r *Room) SendToReadyChannel_READY(playerID string) error {
+	return r.SendToReadyChannel(playerID, SystemMsgOf(SP_READY, "player ready"))
+}
+
+func (r *Room) SendToReadyChannel_LEFT(playerID string) error {
+	r.SendToReadyChannel(playerID, SystemMsgOf(SP_LEFT, "player left or hang up"))
 	return nil
 }
 
@@ -121,6 +122,10 @@ func (r *Room) Lock() {
 
 func (r *Room) Unlock() {
 	r.mutex.Unlock()
+}
+
+func (r *Room) Shutdown() {
+	r.cancel()
 }
 
 func (r *Room) Print() {

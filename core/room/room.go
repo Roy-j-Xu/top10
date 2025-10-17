@@ -11,11 +11,12 @@ import (
 )
 
 type Player struct {
-	ID      string
-	Conn    *websocket.Conn
-	Ready   bool
-	Left    bool // this usually represents disconnection
-	msgChan chan Message
+	ID        string
+	Conn      *websocket.Conn
+	Ready     bool
+	Left      bool         // represents disconnection
+	msgChan   chan Message // handles game related messages
+	readyChan chan Message // handles connection
 }
 
 type Room struct {
@@ -46,19 +47,23 @@ func NewRoomDebug(roomID string, maxSize int) (*Room, error) {
 	msgrs := []Messager{&DebugMessager{}}
 
 	timeout := 10 * time.Minute
+	timer := time.NewTimer(timeout)
 	ctx, cancel := context.WithCancel(context.Background())
 
-	return &Room{
+	room := &Room{
 		ID:        roomID,
 		MaxSize:   maxSize,
 		Players:   make(map[string]*Player),
 		Messagers: msgrs,
 		readyChan: make(chan string, maxSize),
-		Timer:     time.NewTimer(timeout),
+		Timer:     timer,
 		Timeout:   timeout,
 		ctx:       ctx,
 		cancel:    cancel,
-	}, nil
+	}
+	go room.ListenToTimeout()
+
+	return room, nil
 }
 
 func NewRoomWebSocket(roomID string, maxSize int) (*Room, error) {
@@ -70,7 +75,7 @@ func NewRoomWebSocket(roomID string, maxSize int) (*Room, error) {
 	return room, nil
 }
 
-func (r *Room) ListenPlayerChanSync(playerID string) error {
+func (r *Room) ListenPlayerReadySync(playerID string) error {
 	player, err := r.GetPlayerSync(playerID)
 	if err != nil {
 		return fmt.Errorf("listening to player %s in room %s: %w", playerID, r.ID, ErrPlayerNotFound)
@@ -82,15 +87,16 @@ func (r *Room) ListenPlayerChanSync(playerID string) error {
 			r.Message(SystemMsgOf(S_LEFT, "game timed out"), playerID)
 			r.RemovePlayerSync(playerID)
 			return nil
-		case msg := <-player.msgChan:
+		case msg := <-player.readyChan:
 			log.Printf("received message from player %s: %v", playerID, msg)
 			switch msg.Type {
-			case string(P_READY):
+			case string(SP_READY):
 				r.readyChan <- playerID
 				r.ResetTimerSync()
-			case string(P_LEFT):
+			case string(SP_LEFT):
 				if r.InGame {
 					r.Lock()
+					player.Ready = false
 					player.Left = true
 					r.Unlock()
 					r.Broadcast(SystemMsgOf(S_BROADCAST, fmt.Sprintf("player %s disconnected, game may pause", playerID)))
@@ -98,7 +104,6 @@ func (r *Room) ListenPlayerChanSync(playerID string) error {
 					r.RemovePlayerSync(player.ID)
 					return nil
 				}
-
 			default:
 				r.Broadcast(SystemMsgOf(S_ERROR, fmt.Sprintf("unknown message type: %s", msg.Type)))
 			}
@@ -118,9 +123,10 @@ func (r *Room) AddPlayerSync(playerID string, conn *websocket.Conn) error {
 			return fmt.Errorf("adding player %s to room %s, exceed max number: %w", playerID, r.ID, ErrInvalidRoom)
 		}
 		player := &Player{
-			ID:      playerID,
-			Conn:    conn,
-			msgChan: make(chan Message, 10),
+			ID:        playerID,
+			Conn:      conn,
+			readyChan: make(chan Message, 1),
+			msgChan:   make(chan Message, 10),
 		}
 		r.Players[playerID] = player
 		r.ResetTimerUnsafe() // use unsafe to prevent deadlock
@@ -129,7 +135,7 @@ func (r *Room) AddPlayerSync(playerID string, conn *websocket.Conn) error {
 		go r.Message(SystemMsgOf(S_JOINED, playerID), playerID)
 	}
 
-	go r.ListenPlayerChanSync(playerID)
+	go r.ListenPlayerReadySync(playerID)
 
 	return nil
 }
@@ -197,7 +203,7 @@ func (r *Room) WaitAllSync() error {
 
 func (r *Room) WaitForStartSync() error {
 	if err := r.WaitAllSync(); err != nil {
-		r.Broadcast(SystemMsgOf(S_ERROR, "waiting for players timed out"))
+		r.Broadcast(SystemMsgOf(S_ERROR, "wait for start: waiting for players timed out"))
 		return err
 	}
 

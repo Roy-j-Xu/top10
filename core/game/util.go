@@ -52,8 +52,9 @@ func (g *Game) Print() {
 	log.Printf("Room ID: %s", g.Room().ID)
 	log.Printf("Game status: %s", g.Status.Name)
 	log.Printf("Turn order: %v", g.TurnOrder)
-	log.Printf("Guesser ID: %s", g.GuesserID)
 	log.Printf("Turn number: %d", g.TurnNumber)
+	log.Printf("Question: %s", g.Question)
+	log.Printf("Guesser ID: %s", g.GuesserID)
 	log.Println("----------------------")
 	log.Println()
 }

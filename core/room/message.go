@@ -26,8 +26,8 @@ const (
 	S_ERROR     SystemMsgType = "system:error"
 
 	// Messages from players to system
-	P_READY SystemMsgType = "player:ready"
-	P_LEFT  SystemMsgType = "player:leave"
+	SP_READY SystemMsgType = "system-player:ready"
+	SP_LEFT  SystemMsgType = "system-player:leave"
 )
 
 func SystemMsgOf(msgType SystemMsgType, msg any) Message {
