@@ -1,13 +1,13 @@
 # Top 10
 
-Hi, thank you for checking out my little project. This is a multiplayer server for the board game "Top 10" — my friends' and my favorite game.
+Hi, thank you for checking out my little project. This is a multiplayer server for the board game "Top 10" — my friends' and my favorite game, currently being rewritten into a simple library/framework for game networking.
 
-We have tested our server in parties and it works fine, but there is still much to do:
+The original server have been tested in parties. It worked fine, but there are still a lot to do:
 
-- Add lobby management
-- Allow player rejoin
-- Game-lobby logic separation
+- Allow player rejoin (done, tested)
+- Game-lobby logic separation (done, tested)
+- Add lobby management (done, untested)
+- Add message handler on frontend (working)
 - Better frontend
-- Better question set
 
-If you want to try it out yourself, clone the repo and build it with `go build .`
+If you want to try the original version yourself, clone the repo and go to commit `19311578adb3702f2d7fe4a8ce6195a94f7ce798`. Build it with `go build .`. I didn't create a branch because I was lazy, sorry.
