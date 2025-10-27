@@ -15,7 +15,7 @@ func TestRandomQuestion(t *testing.T) {
 func TestReadyRoom(t *testing.T) {
 	game.LoadQuestionSet()
 
-	room, err := room.NewRoomDebug("new room", 10) // use debug messager
+	room, err := room.NewRoomDebug("new room", 10) // use debug messenger
 	if err != nil {
 		t.Fatal(err)
 	}
