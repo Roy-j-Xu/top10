@@ -16,8 +16,8 @@ class GameService {
 
     const resp = await this.newRoom(roomName, roomSize);
 
+    this.sender = new game.sender(this.socketManager);
     this.game = game
-    this.sender = new this.game.sender(this.socketManager);
     return resp;
   }
 
@@ -36,7 +36,12 @@ class GameService {
 
   async joinGame(roomName: string, playerName: string): Promise<RoomInfoResponse> {
     const data = await this.getRoomInfo(roomName);
-    this.socketManager.connect(`${config["socketUrl"]}?roomName=${roomName}&playerName=${playerName}`);
+    console.log(data)
+    this.game = registeredGames[data.game]
+    this.socketManager.connect(
+      `${config["socketUrl"]}?roomName=${roomName}&playerName=${playerName}`,
+      ...Object.values(this.getHandlers()),
+    );
     return data;
   }
 
@@ -56,14 +61,14 @@ class GameService {
 
   getSender<S extends MessageSender>(): S {
     if (this.game === undefined) {
-      throw Error("game not in play, unable to get sender");
+      throw Error("game not found, unable to get sender");
     }
     return this.sender as S;
   }
 
   getHandlers(): Record<string, MessageHandler> {
     if (this.game === undefined) {
-      throw Error("game not in play, unable to get handler");
+      throw Error("game not found, unable to get handler");
     }
     return this.game.handlers;
   }

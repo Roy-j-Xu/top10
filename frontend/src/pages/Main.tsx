@@ -23,6 +23,15 @@ export default function Main() {
     }
   };
 
+  const handleJoinRoom = async () => {
+    try {
+      const info = await gameService.joinGame(roomName, playerName);
+      setRoomInfo(info);
+    } catch (error) {
+      console.error(error)
+    }
+  };
+
   return (
     <div>
       <input
@@ -38,6 +47,7 @@ export default function Main() {
         placeholder="player name"
       />
       <button onClick={handleCreateRoom}>create room</button>
+      <button onClick={handleJoinRoom}>join room</button>
 
       {roomInfo && (
         <div>

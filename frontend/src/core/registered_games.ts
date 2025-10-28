@@ -6,7 +6,7 @@ export const registeredGames: Record<string, Game> = {
   "Top10": {
     minSize: 3,
     maxSize: 10,
-    handlers: {"system": new SystemMessageHandler()},
+    handlers: {"system": new SystemMessageHandler(true)},
     sender: MessageSender,
   },
 }
