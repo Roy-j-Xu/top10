@@ -1,20 +1,18 @@
-export interface Message {
+export interface Message<T = unknown> {
   type: string;
-  msg: unknown;
+  msg: T;
 }
 
 export function messageNamespace(msg: Message) {
 	return msg.type.split(":")[0];
 }
 
-export type MessageHandler = (msg: Message) => void;
-
 export const SystemMsgType = {
   S_JOINED: "system:joined",
-	S_LEFT: "system:left",
-	S_START: "system:start",
-	S_BROADCAST: "system:broadcast",
-	S_ERROR: "system:error",
+  S_LEFT: "system:left",
+  S_START: "system:start",
+  S_BROADCAST: "system:broadcast",
+  S_ERROR: "system:error",
 
   SP_READY: "system-player:ready",
 	SP_LEFT: "system-player:leave",

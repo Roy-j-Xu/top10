@@ -1,8 +1,8 @@
-import type { MessageManager } from "./message_manager";
+import type { MessageHandler } from "./message_handler";
 import type { Message } from "./message_types";
 
 export class SocketManager {
-  private subscribers: Set<MessageManager> = new Set();
+  private subscribers: Set<MessageHandler> = new Set();
   private url: string = "";
   private ws!: WebSocket;
   private isConnected = false;
@@ -12,7 +12,7 @@ export class SocketManager {
     this.subscribers.forEach(s => s.createHandler()(msg));
   }
 
-  connect(url: string, ...msgManagers: MessageManager[]) {
+  connect(url: string, ...msgManagers: MessageHandler[]) {
     this.ws = new WebSocket(url);
     
     msgManagers.forEach(m => this.subscribe(m));
@@ -42,11 +42,11 @@ export class SocketManager {
     this.connect(this.url);
   }
 
-  subscribe(msgManager: MessageManager) {
+  subscribe(msgManager: MessageHandler) {
     this.subscribers.add(msgManager);
   }
 
-  unsubscribe(msgManager: MessageManager) {
+  unsubscribe(msgManager: MessageHandler) {
     this.subscribers.delete(msgManager);
   }
 
