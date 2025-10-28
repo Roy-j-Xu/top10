@@ -1,7 +1,6 @@
 package core
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -27,28 +26,8 @@ func NewGameManager() *GameManager {
 var validRoomName = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,32}$`)
 
 func (gm *GameManager) HandleHTTP() {
-	http.HandleFunc("/api/create-room", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != http.MethodPost {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
-		var req struct {
-			Name string `json:"name"`
-			Size int    `json:"size"`
-		}
-
-		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-			http.Error(w, "invalid JSON body", http.StatusBadRequest)
-			return
-		}
-
-		err := gm.NewRoom(req.Name, req.Size)
-		if err != nil {
-			http.Error(w, fmt.Sprintf("could not create room: %v", err), http.StatusBadRequest)
-			return
-		}
-	})
+	http.HandleFunc("/api/create-room", handleNewRoom(gm))
+	http.HandleFunc("/api/room-info", handleRoomInfo(gm))
 	// joining room and establish socket connection
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		// Parse room name from query or headers
@@ -77,7 +56,7 @@ func (gm *GameManager) RunGame(roomName string) error {
 	return nil
 }
 
-func (gm *GameManager) NewRoom(roomName string, roomSize int) error {
+func (gm *GameManager) NewRoomSync(roomName string, roomSize int) error {
 	if !validRoomName.MatchString(roomName) {
 		return fmt.Errorf("creating room %s: invalid name", roomName)
 	}

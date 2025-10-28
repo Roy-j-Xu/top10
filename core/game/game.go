@@ -1,8 +1,6 @@
 package game
 
-import (
-	"top10/core/room"
-)
+import "top10/core/room"
 
 type Status struct {
 	Name     string

@@ -6,7 +6,7 @@ The original server have been tested in parties. It worked fine, but there are s
 
 - Allow player rejoin (done, tested)
 - Game-lobby logic separation (done, tested)
-- Add lobby management (done, untested)
+- Add lobby management (done, tested)
 - Add message handler on frontend (working)
 - Better frontend
 

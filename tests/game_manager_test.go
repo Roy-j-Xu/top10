@@ -3,7 +3,7 @@ package tests
 import (
 	"bytes"
 	"encoding/json"
-	"io"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -23,8 +23,8 @@ func TestCreateRoom(t *testing.T) {
 	defer ts.Close()
 
 	body, _ := json.Marshal(map[string]any{
-		"name": "test_room",
-		"size": 4,
+		"roomName": "test_room",
+		"roomSize": 4,
 	})
 	resp, err := http.Post(ts.URL+"/api/create-room", "application/json", bytes.NewReader(body))
 	if err != nil {
@@ -39,9 +39,11 @@ func TestCreateRoom(t *testing.T) {
 	}
 
 	// Check if the room exists
-	if _, err := gm.GetRoomSync("test_room"); err != nil {
+	r, err := gm.GetRoomSync("test_room")
+	if err != nil {
 		t.Fatalf("room not found after creation: %v", err)
 	}
+	r.Print()
 
 	<-time.After(10 * time.Millisecond)
 }
@@ -53,8 +55,8 @@ func TestJoinRoom(t *testing.T) {
 	defer ts.Close()
 
 	body, _ := json.Marshal(map[string]any{
-		"name": "test_room",
-		"size": 4,
+		"roomName": "test_room",
+		"roomSize": 4,
 	})
 	resp, err := http.Post(ts.URL+"/api/create-room", "application/json", bytes.NewReader(body))
 	if err != nil {
@@ -67,6 +69,9 @@ func TestJoinRoom(t *testing.T) {
 	// socket connection
 	conn := wsConnect(t, ts, "test_room")
 	wait10msAnd(func() { conn.WriteJSON("player42") })
+
+	wait10msAnd(func() { getRoomInfo(t, ts, "test_room") })
+
 	wait10msAnd(func() { conn.Close() })
 
 	<-time.After(10 * time.Millisecond)
@@ -89,15 +94,11 @@ func wsConnect(t *testing.T, ts *httptest.Server, roomName string) *websocket.Co
 	return ws
 }
 
-func logResponse(t *testing.T, resp *http.Response) {
-	var pretty bytes.Buffer
-	body, err := io.ReadAll(resp.Body)
+func getRoomInfo(t *testing.T, ts *httptest.Server, roomName string) {
+	resp, err := http.Get(ts.URL + fmt.Sprintf("/api/room-info?roomName=%s", roomName))
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("failed to make request: %v", err)
 	}
-	if err := json.Indent(&pretty, body, "", "  "); err != nil {
-		t.Logf("Response (not JSON): %s", string(body))
-		return
-	}
-	t.Logf("Response JSON:\n%s", pretty.String())
+	logResponse(t, resp)
+	defer resp.Body.Close()
 }
