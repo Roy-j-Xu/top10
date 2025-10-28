@@ -4,7 +4,8 @@ import { MessageSender, SystemMessageHandler } from "./message"
 
 export const registeredGames: Record<string, Game> = {
   "Top10": {
-    url: "/ws",
+    minSize: 3,
+    maxSize: 10,
     handlers: {"system": new SystemMessageHandler()},
     sender: MessageSender,
   },

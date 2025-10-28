@@ -1,5 +1,5 @@
 import type { Game } from "./games/game";
-import { MessageHandler, MessageSender, SocketManager } from "./message";
+import { MessageHandler, MessageSender, SocketManager, type RoomInfoResponse } from "./message";
 import { registeredGames } from "./registered_games";
 import config from "../../config.json"
 
@@ -8,15 +8,48 @@ class GameService {
   private sender?: MessageSender;
   private game?: Game;
   
-  runGame(gameName: string) {
-    this.game = registeredGames[gameName];
-    this.sender = new this.game.sender(this.socketManager);
+  async newGame(roomName: string, roomSize: number, gameName: string): Promise<RoomInfoResponse> {
+    const game = registeredGames[gameName];
+    if (roomSize < game.minSize || game.maxSize < roomSize) {
+      throw Error("invalid room size for game");
+    }
 
-    const url = `${config['baseUrl']}${this.game.url}}`;
-    this.socketManager.connect(url, ...Object.values(this.game.handlers));
+    const resp = await this.newRoom(roomName, roomSize);
+
+    this.game = game
+    this.sender = new this.game.sender(this.socketManager);
+    return resp;
+  }
+
+  private async newRoom(roomName: string, roomSize: number): Promise<RoomInfoResponse> {
+    const body = JSON.stringify({ roomName: roomName, roomSize: roomSize});
+    console.log(body);
+    const response = await fetch(`${config["apiUrl"]}/create-room`, {
+      method: "POST",
+      body: body,
+    });
+    if (!response.ok) {
+      throw Error(`creating room: ${JSON.stringify(response)}`);
+    }
+    return await response.json();
+  }
+
+  async joinGame(roomName: string, playerName: string): Promise<RoomInfoResponse> {
+    const data = await this.getRoomInfo(roomName);
+    this.socketManager.connect(`ws://${config["socketUrl"]}/ws?room=${roomName}`);
+    this.socketManager.send(playerName)
+    return data;
+  }
+
+  async getRoomInfo(roomName: string): Promise<RoomInfoResponse> {
+    const response = await fetch(`${config["apiUrl"]}/room-info?roomName=${roomName}`);
+    if (!response.ok) {
+      throw Error(`creating room: ${JSON.stringify(response)}`);
+    }
+    return await response.json();
   }
   
-  endCurrentGame() {
+  endGame() {
     this.game = undefined;
     this.sender = undefined;
     this.socketManager.close();

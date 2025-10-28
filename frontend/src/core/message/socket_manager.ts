@@ -50,7 +50,7 @@ export class SocketManager {
     this.subscribers.delete(msgManager);
   }
 
-  send(msg: Message) {
+  send(msg: Message | string) {
     if (!this.isConnected) throw new Error('WebSocket not connected');
     this.ws.send(JSON.stringify(msg));
   }

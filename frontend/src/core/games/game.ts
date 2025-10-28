@@ -1,7 +1,8 @@
 import type { MessageHandler, MessageSender, SocketManager } from "../message";
 
 export interface Game {
-  url: string;
+  minSize: number;
+  maxSize: number;
   handlers: Record<string, MessageHandler>;
   sender: new (socket: SocketManager) => MessageSender;
 }

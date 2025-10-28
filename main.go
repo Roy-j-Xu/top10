@@ -11,7 +11,7 @@ func main() {
 
 	serveFrontend()
 
-	log.Fatal(http.ListenAndServe("0.0.0.0:9000", nil))
+	log.Fatal(http.ListenAndServe("0.0.0.0:8000", nil))
 }
 
 func serveFrontend() {

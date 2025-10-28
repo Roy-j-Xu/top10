@@ -19,3 +19,10 @@ export const SystemMsgType = {
 } as const;
 
 export type SystemMsgType = typeof SystemMsgType[keyof typeof SystemMsgType];
+
+export interface RoomInfoResponse {
+  roomName: string,
+	roomSize: number,
+	game:     string,
+	players:  string[],
+}
