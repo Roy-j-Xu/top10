@@ -3,8 +3,15 @@ package core
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"regexp"
+	"top10/core/room"
+
+	"github.com/gorilla/websocket"
 )
+
+var validName = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,32}$`)
 
 func handleNewRoom(gm *GameManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -20,6 +27,15 @@ func handleNewRoom(gm *GameManager) http.HandlerFunc {
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			http.Error(w, "invalid JSON body", http.StatusBadRequest)
+			return
+		}
+
+		if !validName.MatchString(req.Name) {
+			http.Error(w, fmt.Sprintf("invalid room name \"%s\"", req.Name), http.StatusBadRequest)
+			return
+		}
+		if req.Size <= 0 || req.Size >= 21 {
+			http.Error(w, fmt.Sprintf("invalid room size \"%d\"", req.Size), http.StatusBadRequest)
 			return
 		}
 
@@ -59,5 +75,71 @@ func handleRoomInfo(gm *GameManager) http.HandlerFunc {
 			Game:     "Top10",
 			Players:  rm.GetAllPlayerIDsSync(),
 		}, 200)
+	}
+}
+
+func joinHandler(gm *GameManager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		// Parse room name from query or headers
+		roomName := r.URL.Query().Get("roomName")
+		playerID := r.URL.Query().Get("playerName")
+
+		rm, err := gm.GetRoomSync(roomName)
+		if err != nil {
+			http.Error(w, "room not found", http.StatusNotFound)
+			return
+		}
+
+		conn, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.Println("WebSocket upgrade failed:", err)
+			return
+		}
+
+		if rm.PlayerExistsAndLeftSync(playerID) {
+			err = rm.RejoinPlayerSync(playerID, conn)
+		} else {
+			err = rm.AddPlayerSync(playerID, conn)
+		}
+
+		if err != nil {
+			log.Println("failed to join:", err)
+			conn.WriteJSON(fmt.Sprint("failed to join", err.Error()))
+			conn.Close()
+			return
+		}
+
+		go handlePlayerMessages(rm, playerID)
+	}
+}
+
+var upgrader = websocket.Upgrader{
+	CheckOrigin: func(r *http.Request) bool { return true }, // allow all origins
+}
+
+func handlePlayerMessages(r *room.Room, playerID string) {
+	player, err := r.GetPlayerSync(playerID)
+	if err != nil {
+		log.Printf("unable to listen for message from player %s: %s", playerID, err.Error())
+		return
+	}
+	log.Printf("listening for messages from player %s", playerID)
+	defer func() {
+		r.SendToReadyChannel_LEFT(playerID)
+		player.Conn.Close()
+	}()
+
+	for {
+		var msg room.Message
+		if err := player.Conn.ReadJSON(&msg); err != nil {
+			log.Println("Read error:", err)
+			return
+		}
+
+		if msg.Type == string(room.SP_READY) || msg.Type == string(room.SP_LEFT) {
+			r.SendToReadyChannel(playerID, msg)
+		} else {
+			r.SendToPlayerChannel(playerID, msg)
+		}
 	}
 }

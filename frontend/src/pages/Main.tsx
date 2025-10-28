@@ -3,19 +3,23 @@ import gameService from "../core/game_service";
 import type { RoomInfoResponse } from "../core";
 
 export default function Main() {
-  const [inputValue, setInputValue] = useState("");
+  const [roomName, setRoomName] = useState("");
+  const [playerName, setPlayerName] = useState("");
   const [roomInfo, setRoomInfo] = useState<RoomInfoResponse>();
 
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
-  };
+  function handleInputChange(setter: (input: string) => void) {
+    return (e: ChangeEvent<HTMLInputElement>) => {
+      setter(e.target.value);
+    };
+  }
 
-  const handleButtonClick = async () => {
+  const handleCreateRoom = async () => {
     try {
-      const resp = await gameService.newGame(inputValue, 4, "Top10");
-      setRoomInfo(resp);
+      await gameService.newGame(roomName, 4, "Top10");
+      const info = await gameService.joinGame(roomName, playerName);
+      setRoomInfo(info);
     } catch (error) {
-      console.error("error:", error);
+      console.error(error);
     }
   };
 
@@ -23,11 +27,17 @@ export default function Main() {
     <div>
       <input
         type="text"
-        value={inputValue}
-        onChange={handleInputChange}
+        value={roomName}
+        onChange={handleInputChange(setRoomName)}
         placeholder="room name"
       />
-      <button onClick={handleButtonClick}>create room</button>
+      <input
+        type="text"
+        value={playerName}
+        onChange={handleInputChange(setPlayerName)}
+        placeholder="player name"
+      />
+      <button onClick={handleCreateRoom}>create room</button>
 
       {roomInfo && (
         <div>

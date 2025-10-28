@@ -13,10 +13,14 @@ export class SocketManager {
   }
 
   connect(url: string, ...msgManagers: MessageHandler[]) {
+    if (this.isConnected) {
+      return;
+    }
+
     this.ws = new WebSocket(url);
     
     msgManagers.forEach(m => this.subscribe(m));
-    this.ws.onmessage = this.onMessage;
+    this.ws.onmessage = this.onMessage.bind(this);
 
     this.ws.onopen = () => {
       this.isConnected = true;

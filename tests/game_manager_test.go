@@ -67,8 +67,7 @@ func TestJoinRoom(t *testing.T) {
 	<-time.After(10 * time.Millisecond)
 
 	// socket connection
-	conn := wsConnect(t, ts, "test_room")
-	wait10msAnd(func() { conn.WriteJSON("player42") })
+	conn := joinRoom(t, ts, "test_room", "player42")
 
 	wait10msAnd(func() { getRoomInfo(t, ts, "test_room") })
 
@@ -77,12 +76,13 @@ func TestJoinRoom(t *testing.T) {
 	<-time.After(10 * time.Millisecond)
 }
 
-func wsConnect(t *testing.T, ts *httptest.Server, roomName string) *websocket.Conn {
+func joinRoom(t *testing.T, ts *httptest.Server, roomName string, playerName string) *websocket.Conn {
 	u, _ := url.Parse(ts.URL)
 	u.Scheme = "ws"
 	u.Path = "/ws"
 	q := u.Query()
-	q.Set("room", roomName)
+	q.Set("roomName", roomName)
+	q.Set("playerName", playerName)
 	u.RawQuery = q.Encode()
 
 	// Connect with a real WebSocket client
