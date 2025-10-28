@@ -11,6 +11,10 @@ export class MessageHandler {
     };
   }
 
+  debug() {
+    console.log(this.handlers)
+  }
+
   register(msgType: string, handler: (msg: Message) => void): () => void {
     if (!this.handlers.has(msgType)) {
       this.handlers.set(msgType, new Set());
@@ -49,15 +53,18 @@ export class SystemMessageHandler extends MessageHandler {
   }
 
   private useLogger() {
-    for (const type in SystemMsgType) {
+    Object.values(SystemMsgType).forEach(type => {
       if (type === SystemMsgType.SP_LEFT || type === SystemMsgType.SP_READY) {
-        continue;
+        return;
       }
       if (type === SystemMsgType.S_ERROR) {
         this.register(type, (msg) => console.error(msg));
       }
-      this.register(type, (msg) => console.log(msg));
-    }
+      this.register(type, (msg) => logMessage(msg));
+    });
   }
+}
 
+function logMessage(msg: Message) {
+  console.log(`[${msg.type}] ${msg.msg}`)
 }

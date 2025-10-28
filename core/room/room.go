@@ -41,7 +41,7 @@ type Room struct {
 
 func NewRoomDebug(roomID string, maxSize int) (*Room, error) {
 	if maxSize >= 20 {
-		return nil, fmt.Errorf("room %s is too large: %w", roomID, ErrInvalidRoom)
+		return nil, fmt.Errorf("room \"%s\" is too large: %w", roomID, ErrInvalidRoom)
 	}
 
 	msgrs := []Messenger{&DebugMessenger{}}
@@ -78,7 +78,7 @@ func NewRoomWebSocket(roomID string, maxSize int) (*Room, error) {
 func (r *Room) ListenPlayerReadySync(playerID string) error {
 	player, err := r.GetPlayerSync(playerID)
 	if err != nil {
-		return fmt.Errorf("listening to player %s in room %s: %w", playerID, r.ID, ErrPlayerNotFound)
+		return fmt.Errorf("listening to player \"%s\" in room \"%s\": %w", playerID, r.ID, ErrPlayerNotFound)
 	}
 
 	for {
@@ -88,7 +88,7 @@ func (r *Room) ListenPlayerReadySync(playerID string) error {
 			r.RemovePlayerSync(playerID)
 			return nil
 		case msg := <-player.readyChan:
-			log.Printf("received message from player %s: %v", playerID, msg)
+			log.Printf("received message from player \"%s\": %v", playerID, msg)
 			switch msg.Type {
 			case string(SP_READY):
 				r.readyChan <- playerID
@@ -99,7 +99,7 @@ func (r *Room) ListenPlayerReadySync(playerID string) error {
 					player.Ready = false
 					player.Left = true
 					r.Unlock()
-					r.Broadcast(SystemMsgOf(S_BROADCAST, fmt.Sprintf("player %s disconnected, game may pause", playerID)))
+					r.Broadcast(SystemMsgOf(S_BROADCAST, fmt.Sprintf("player \"%s\" disconnected, game may pause", playerID)))
 				} else {
 					r.RemovePlayerSync(player.ID)
 				}
@@ -119,11 +119,11 @@ func (r *Room) AddPlayerSync(playerID string, conn *websocket.Conn) error {
 	defer r.Unlock()
 
 	if _, ok := r.Players[playerID]; ok {
-		return fmt.Errorf("adding player %s to room %s: %w", playerID, r.ID, ErrPlayerExists)
+		return fmt.Errorf("adding player \"%s\" to room \"%s\": %w", playerID, r.ID, ErrPlayerExists)
 	} else {
 		// do not use r.SizeSync, otherwise deadlock
 		if r.Size() >= r.MaxSize {
-			return fmt.Errorf("adding player %s to room %s, exceed max number: %w", playerID, r.ID, ErrInvalidRoom)
+			return fmt.Errorf("adding player \"%s\" to room \"%s\", exceed max number: %w", playerID, r.ID, ErrInvalidRoom)
 		}
 		player := &Player{
 			ID:        playerID,
@@ -134,7 +134,7 @@ func (r *Room) AddPlayerSync(playerID string, conn *websocket.Conn) error {
 		r.Players[playerID] = player
 		r.ResetTimerUnsafe() // use unsafe to prevent deadlock
 
-		go r.Broadcast(SystemMsgOf(S_JOINED, fmt.Sprintf("player %s joined", playerID)))
+		go r.Broadcast(SystemMsgOf(S_JOINED, fmt.Sprintf("player \"%s\" joined", playerID)))
 		go r.Message(SystemMsgOf(S_JOINED, playerID), playerID)
 	}
 
@@ -147,14 +147,14 @@ func (r *Room) RejoinPlayerSync(playerID string, conn *websocket.Conn) error {
 	r.Lock()
 	defer r.Unlock()
 	if _, ok := r.Players[playerID]; !ok {
-		return fmt.Errorf("rejoining player %s to room %s: %w", playerID, r.ID, ErrPlayerNotFound)
+		return fmt.Errorf("rejoining player \"%s\" to room \"%s\": %w", playerID, r.ID, ErrPlayerNotFound)
 	}
 
 	r.Players[playerID].Left = false
 	r.Players[playerID].Conn = conn
 	r.ResetTimerUnsafe() // use unsafe to prevent deadlock
 
-	go r.Broadcast(SystemMsgOf(S_JOINED, fmt.Sprintf("player %s rejoined", playerID)))
+	go r.Broadcast(SystemMsgOf(S_JOINED, fmt.Sprintf("player \"%s\" rejoined", playerID)))
 	return nil
 }
 
@@ -163,11 +163,11 @@ func (r *Room) RemovePlayerSync(playerID string) error {
 	defer r.Unlock()
 
 	if _, ok := r.Players[playerID]; !ok {
-		return fmt.Errorf("removing player %s from room %s: %w", playerID, r.ID, ErrPlayerNotFound)
+		return fmt.Errorf("removing player \"%s\" from room \"%s\": %w", playerID, r.ID, ErrPlayerNotFound)
 	}
 	delete(r.Players, playerID)
 
-	go r.Broadcast(SystemMsgOf(S_LEFT, fmt.Sprintf("player %s left", playerID)))
+	go r.Broadcast(SystemMsgOf(S_LEFT, fmt.Sprintf("player \"%s\" left", playerID)))
 
 	return nil
 }
@@ -177,7 +177,7 @@ func (r *Room) WaitAllSync() error {
 	for {
 		select {
 		case <-time.After(r.Timeout):
-			return fmt.Errorf("waiting for players in room %s: %w", r.ID, ErrTimeout)
+			return fmt.Errorf("waiting for players in room \"%s\": %w", r.ID, ErrTimeout)
 		case playerID := <-r.readyChan:
 			// no lock here, use Sync methods
 			player, err := r.GetPlayerSync(playerID)
@@ -192,7 +192,7 @@ func (r *Room) WaitAllSync() error {
 				roomSize := r.SizeSync()
 				go r.Broadcast(SystemMsgOf(
 					S_BROADCAST,
-					fmt.Sprintf("player %s is ready (%d/%d)", playerID, numberOfReadies, roomSize),
+					fmt.Sprintf("player \"%s\" is ready (%d/%d)", playerID, numberOfReadies, roomSize),
 				))
 				if numberOfReadies >= roomSize {
 					r.UnreadyAllSync()

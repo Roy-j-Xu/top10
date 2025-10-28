@@ -24,24 +24,27 @@ export class SocketManager {
 
     this.ws.onopen = () => {
       this.isConnected = true;
-      console.log('Connected to server');
+      console.log('connected to server');
     };
 
     this.ws.onclose = () => {
       this.isConnected = false;
-      console.log('Disconnected from server');
+      console.log('disconnected from server');
     };
 
     this.ws.onerror = (err) => {
-      console.error('WebSocket error', err);
+      console.error('webSocket error', err);
     };
 
     this.isConnected = true;
   }
 
   reconnect() {
-    if (!this.isConnected || this.url === "") {
-      return;
+    if (!this.isConnected) {
+      throw Error("socket reconnect: already connected");
+    }
+    if (this.url === "") {
+      throw Error("socket reconnect: url not known");
     }
     this.connect(this.url);
   }

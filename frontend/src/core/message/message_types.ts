@@ -18,8 +18,6 @@ export const SystemMsgType = {
 	SP_LEFT: "system-player:leave",
 } as const;
 
-export type SystemMsgType = typeof SystemMsgType[keyof typeof SystemMsgType];
-
 export interface RoomInfoResponse {
   roomName: string,
 	roomSize: number,

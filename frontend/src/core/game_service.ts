@@ -36,7 +36,6 @@ class GameService {
 
   async joinGame(roomName: string, playerName: string): Promise<RoomInfoResponse> {
     const data = await this.getRoomInfo(roomName);
-    console.log(data)
     this.game = registeredGames[data.game]
     this.socketManager.connect(
       `${config["socketUrl"]}?roomName=${roomName}&playerName=${playerName}`,

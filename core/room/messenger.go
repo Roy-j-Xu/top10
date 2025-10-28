@@ -6,8 +6,8 @@ import (
 )
 
 type Message struct {
-	Type string
-	Msg  any
+	Type string `json:"type"`
+	Msg  any    `json:"msg"`
 }
 
 type Messenger interface {
