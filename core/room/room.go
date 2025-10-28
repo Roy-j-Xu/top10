@@ -84,7 +84,7 @@ func (r *Room) ListenPlayerReadySync(playerID string) error {
 	for {
 		select {
 		case <-r.ctx.Done():
-			r.Message(SystemMsgOf(S_LEFT, "game timed out"), playerID)
+			r.Message(SystemMsgOf(S_LEFT, "you are disconnected from game"), playerID)
 			r.RemovePlayerSync(playerID)
 			return nil
 		case msg := <-player.readyChan:
@@ -102,7 +102,10 @@ func (r *Room) ListenPlayerReadySync(playerID string) error {
 					r.Broadcast(SystemMsgOf(S_BROADCAST, fmt.Sprintf("player %s disconnected, game may pause", playerID)))
 				} else {
 					r.RemovePlayerSync(player.ID)
-					return nil
+				}
+				if r.SizeSync() <= 0 {
+					log.Println("no player in room, shutting down")
+					r.Shutdown()
 				}
 			default:
 				r.Broadcast(SystemMsgOf(S_ERROR, fmt.Sprintf("unknown message type: %s", msg.Type)))
@@ -202,6 +205,7 @@ func (r *Room) WaitAllSync() error {
 }
 
 func (r *Room) WaitForStartSync() error {
+	r.Broadcast(SystemMsgOf(S_BROADCAST, "wait for start"))
 	if err := r.WaitAllSync(); err != nil {
 		r.Broadcast(SystemMsgOf(S_ERROR, "wait for start: waiting for players timed out"))
 		return err

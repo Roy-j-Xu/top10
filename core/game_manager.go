@@ -49,6 +49,7 @@ func (gm *GameManager) HandleHTTP() {
 			return
 		}
 	})
+	// joining room and establish socket connection
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		// Parse room name from query or headers
 		roomName := r.URL.Query().Get("room")
@@ -98,6 +99,10 @@ func (gm *GameManager) NewRoom(roomName string, roomSize int) error {
 	gm.Rooms[room.ID] = room
 
 	go gm.watchRoom(room)
+	go func() {
+		room.WaitForStartSync()
+		game.NewGame(room)
+	}()
 
 	return nil
 }
@@ -113,6 +118,7 @@ func wsHandler(rm *room.Room, w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// block and wait for the next package
 	var playerID string
 	if err := conn.ReadJSON(&playerID); err != nil {
 		log.Println("failed to read player name:", err)
@@ -143,9 +149,9 @@ func handlePlayerMessages(r *room.Room, playerID string) {
 		log.Printf("unable to listen for message from player %s: %s", playerID, err.Error())
 		return
 	}
-	log.Printf("listening for messages from player %s", player.ID)
+	log.Printf("listening for messages from player %s", playerID)
 	defer func() {
-		r.SendToReadyChannel_LEFT(player.ID)
+		r.SendToReadyChannel_LEFT(playerID)
 		player.Conn.Close()
 	}()
 
@@ -157,22 +163,20 @@ func handlePlayerMessages(r *room.Room, playerID string) {
 		}
 
 		if msg.Type == string(room.SP_READY) || msg.Type == string(room.SP_LEFT) {
-			r.SendToReadyChannel(player.ID, msg)
+			r.SendToReadyChannel(playerID, msg)
 		} else {
-			r.SendToPlayerChannel(player.ID, msg)
+			r.SendToPlayerChannel(playerID, msg)
 		}
 	}
 }
 
 // deletes room when its context is done
 func (gm *GameManager) watchRoom(r *room.Room) {
-	go func() {
-		<-r.StopCtx().Done() // wait until room stops
-		gm.mutex.Lock()
-		defer gm.mutex.Unlock()
-		delete(gm.Rooms, r.ID)
-		log.Printf("room %s removed from manager", r.ID)
-	}()
+	<-r.StopCtx().Done() // wait until room stops
+	gm.mutex.Lock()
+	defer gm.mutex.Unlock()
+	delete(gm.Rooms, r.ID)
+	log.Printf("room %s removed", r.ID)
 }
 
 func (gm *GameManager) GetRoomSync(roomID string) (*room.Room, error) {
