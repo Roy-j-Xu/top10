@@ -21,7 +21,7 @@ export default function Main() {
       await gameService.newGame(roomName, 4, "Top10");
       const info = await gameService.joinGame(roomName, playerName);
       setRoomInfo(info);
-      navigate(`/topten/${roomName}`);
+      navigate(`/topten/${roomName}/${playerName}`);
     } catch (error) {
       console.error(error);
     }
@@ -31,7 +31,7 @@ export default function Main() {
     try {
       const info = await gameService.joinGame(roomName, playerName);
       setRoomInfo(info);
-      navigate(`/topten/${roomName}`);
+      navigate(`/topten/${roomName}/${playerName}`);
     } catch (error) {
       console.error(error)
     }

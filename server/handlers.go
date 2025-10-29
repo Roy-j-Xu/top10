@@ -85,6 +85,11 @@ func joinHandler(gm *core.GameManager) http.HandlerFunc {
 		roomName := r.URL.Query().Get("roomName")
 		playerID := r.URL.Query().Get("playerName")
 
+		if !validName.MatchString(playerID) {
+			http.Error(w, fmt.Sprintf("invalid player name \"%s\"", playerID), http.StatusBadRequest)
+			return
+		}
+
 		rm, err := gm.GetRoomSync(roomName)
 		if err != nil {
 			http.Error(w, "room not found", http.StatusNotFound)

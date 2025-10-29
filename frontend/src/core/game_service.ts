@@ -17,15 +17,18 @@ class GameService {
 
     const resp = await this.newRoom(roomName, roomSize);
 
-    this.initHandlers(game.handlerFactories);
-    this.sender = game.senderFactory(this.socketManager);
-    this.game = game
+    this.initServiceForGame(game);
     return resp;
   }
 
+  private initServiceForGame(game: Game) {
+    this.initHandlers(game.handlerFactories);
+    this.sender = game.senderFactory(this.socketManager);
+    this.game = game;
+  } 
+
   private async newRoom(roomName: string, roomSize: number): Promise<RoomInfoResponse> {
     const body = JSON.stringify({ roomName: roomName, roomSize: roomSize});
-    console.log(body);
     const response = await fetch(`${config["apiUrl"]}/create-room`, {
       method: "POST",
       body: body,
@@ -42,7 +45,7 @@ class GameService {
     if (!game) {
       throw Error("game not found")
     }
-    this.game = game;
+    this.initServiceForGame(game);
 
     this.socketManager.connect(
       `${config["socketUrl"]}?roomName=${roomName}&playerName=${playerName}`,
@@ -57,6 +60,10 @@ class GameService {
       throw Error(`creating room: ${JSON.stringify(response)}`);
     }
     return await response.json();
+  }
+
+  isJoined(): boolean {
+    return this.socketManager.isConnected;
   }
 
   ready() {

@@ -1,56 +1,74 @@
 import { useEffect, useState } from "react"
-import type { TopTenHandler, TurnInfoResponse } from "../core/games/top10";
+import type { TopTenHandler, TurnInfoMsgData } from "../core/games/top10";
 import type { RoomInfoResponse, SystemMessageHandler } from "../core";
 import gameService from "../core/game_service";
 import { useParams } from "react-router-dom";
 
 export function TopTen() {
-  const { roomName } = useParams();
+  const { roomName, playerName } = useParams();
   
-  const [playerNum, setPlayerNum] = useState(1);
-  const [roomInfo, setRoomInfo] = useState<RoomInfoResponse>();
-  const [turnInfo, setTurnInfo] = useState<TurnInfoResponse>();
-
   const gameMsgHandler = gameService.getHandler<TopTenHandler>("game");
   const systemMsgHandler = gameService.getHandler<SystemMessageHandler>("system");
 
+  if (!roomName || !playerName) {
+    return <h1>404 - Invalid room name or player name</h1>;
+  }
+
+  return (
+    <GameBoard 
+      roomName={roomName}
+      playerName={playerName}
+      gameMsgHandler={gameMsgHandler}
+      sysMsgHandler={systemMsgHandler}
+    />
+  )
+}
+
+interface GameBoardParam {
+  roomName: string;
+  playerName: string;
+  gameMsgHandler: TopTenHandler;
+  sysMsgHandler: SystemMessageHandler;
+}
+
+function GameBoard(params: GameBoardParam) {
+  const { roomName, playerName, gameMsgHandler, sysMsgHandler } = params;
+
+  const [playerNum, setPlayerNum] = useState(1);
+  const [roomInfo, setRoomInfo] = useState<RoomInfoResponse>();
+  const [turnInfo, setTurnInfo] = useState<TurnInfoMsgData>();
+
   // update message handlers
   useEffect(() => {
-    systemMsgHandler.onJoined(() => {
+    sysMsgHandler.onJoined((msg) => {
+      console.log(msg.msg.playerName);
       setPlayerNum(prev => prev + 1);
     });
-    systemMsgHandler.onLeft(() => {
+    sysMsgHandler.onLeft((msg) => {
+      console.log(msg.msg.playerName);
       setPlayerNum(prev => prev - 1);
     })
     gameMsgHandler.onTurnInfo((msg) => {
-      setTurnInfo(msg.msg as TurnInfoResponse);
+      setTurnInfo(msg.msg);
     })
     window.addEventListener("beforeunload", gameService.endGame);
-  }, [gameMsgHandler, systemMsgHandler]);
+  }, [gameMsgHandler, sysMsgHandler]);
   
-  // update room info
+  // get room info
   useEffect(() => {
-    if (!roomName) {
-      return;
-    }
     gameService.getRoomInfo(roomName)
       .then(info => {
         setPlayerNum(info.players.length);
         setRoomInfo(info);
       });
-  }, [playerNum, roomName]);
-
-  if (!roomName) {
-    return <h1>404 - Invalid room name</h1>;
-  }
-  if (!gameMsgHandler || ! systemMsgHandler) {
-    return <h1>500 - Internal server error</h1>
-  }
+  }, [roomName]);
 
   return (
     <div>
+      <h1>Top10</h1>
+      <div>Wellcome {playerName}</div>
       <div>{JSON.stringify(roomInfo)}</div>
-      <div>{playerNum}</div>
+      <div>Number of players: {playerNum}</div>
       <div>{JSON.stringify(turnInfo)}</div>
     </div>
   )

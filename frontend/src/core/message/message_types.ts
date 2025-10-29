@@ -10,6 +10,7 @@ export function messageNamespace(msg: Message) {
 export const SystemMsgType = {
   JOINED: "system:joined",
   LEFT: "system:left",
+  READY: "system:ready",
   START: "system:start",
   BROADCAST: "system:broadcast",
   ERROR: "system:error",
@@ -26,3 +27,14 @@ export interface RoomInfoResponse {
 	game:     string,
 	players:  string[],
 }
+
+interface PlayerMsgData {
+  playerName: string;
+  message: string;
+}
+
+export type {
+  PlayerMsgData as JoinedMsgData,
+  PlayerMsgData as LeftMsgData,
+  PlayerMsgData as ReadyMsgData,
+};

@@ -3,9 +3,9 @@ import type { Message } from "./message_types";
 
 export class SocketManager {
   private subscribers: Set<MessageHandler> = new Set();
-  private url: string = "";
   private ws!: WebSocket;
-  private isConnected = false;
+
+  public isConnected = false;
 
   private onMessage(event: MessageEvent) {
     const msg: Message = JSON.parse(event.data);
@@ -15,6 +15,9 @@ export class SocketManager {
   connect(url: string, ...msgManagers: MessageHandler[]) {
     if (this.isConnected) {
       return;
+    }
+    if (!url) {
+      throw Error("socket reconnect: url not known");
     }
 
     this.ws = new WebSocket(url);
@@ -39,16 +42,6 @@ export class SocketManager {
     this.isConnected = true;
   }
 
-  reconnect() {
-    if (!this.isConnected) {
-      throw Error("socket reconnect: already connected");
-    }
-    if (this.url === "") {
-      throw Error("socket reconnect: url not known");
-    }
-    this.connect(this.url);
-  }
-
   subscribe(msgManager: MessageHandler) {
     this.subscribers.add(msgManager);
   }
@@ -66,6 +59,5 @@ export class SocketManager {
     this.ws.close();
     this.subscribers.forEach(s => this.unsubscribe(s));
     this.isConnected = false;
-    this.url = "";
   }
 }

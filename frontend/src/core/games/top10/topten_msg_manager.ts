@@ -1,5 +1,5 @@
-import { logMessage, MessageHandler, MessageSender, type Message } from "../../message";
-import { TopTenMsgType, TopTenPlayerMsgType } from "./types";
+import { logMessage, MessageHandler, MessageSender, type HandlerFunc } from "../../message";
+import { TopTenMsgType, TopTenPlayerMsgType, type TurnInfoMsgData } from "./types";
 
 export class TopTenHandler extends MessageHandler {
   constructor() {
@@ -7,11 +7,11 @@ export class TopTenHandler extends MessageHandler {
     this.useLogger();
   }
 
-  onTurnInfo(handler: (msg: Message) => void) {
-    this.register(TopTenMsgType.TURN_INFO, handler);
+  onTurnInfo(handler: HandlerFunc<TurnInfoMsgData>) {
+    this.register(TopTenMsgType.TURN_INFO, handler as HandlerFunc);
   }
 
-  onAssignNumbers(handler: (msg: Message) => void) {
+  onAssignNumbers(handler: HandlerFunc) {
     this.register(TopTenMsgType.ASSIGN_NUMBERS, handler);
   }
 

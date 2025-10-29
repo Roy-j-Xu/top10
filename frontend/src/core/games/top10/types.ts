@@ -16,7 +16,7 @@ export const TopTenPlayerMsgType = {
   CHOOSE_ORDER : "topten-player:choose-order",
 }
 
-export interface TurnInfoResponse {
+export interface TurnInfoMsgData {
   turn: number;
   guesser: string;
   questions: string[];

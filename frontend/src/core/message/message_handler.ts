@@ -1,9 +1,11 @@
-import { SystemMsgType, type Message } from "./message_types";
+import { SystemMsgType, type JoinedMsgData, type LeftMsgData, type Message, type ReadyMsgData } from "./message_types";
 import type { SocketManager } from "./socket_manager";
 import { logMessage } from "./utils";
 
+export type HandlerFunc<T=unknown> = (msg: Message<T>) => void;
+
 export class MessageHandler {
-  protected handlers: Map<string, Set<(msg: Message) => void>> = new Map();
+  protected handlers: Map<string, Set<HandlerFunc>> = new Map();
 
   createHandler(): (msg: Message) => void {
     return (msg: Message) => {
@@ -12,7 +14,7 @@ export class MessageHandler {
     };
   }
 
-  register(msgType: string, handler: (msg: Message) => void): () => void {
+  register(msgType: string, handler: HandlerFunc): () => void {
     if (!this.handlers.has(msgType)) {
       this.handlers.set(msgType, new Set());
     }
@@ -20,7 +22,7 @@ export class MessageHandler {
     return () => this.unregister(msgType, handler);
   }
 
-  unregister(type: string, handler: (msg: Message) => void) {
+  unregister(type: string, handler: HandlerFunc) {
     const handlerSet = this.handlers.get(type);
     if (!handlerSet) return;
     handlerSet.delete(handler);
@@ -49,16 +51,20 @@ export class SystemMessageHandler extends MessageHandler {
     }
   }
 
-  onJoined(handler: (msg: Message) => void) {
-    this.register(SystemMsgType.JOINED, handler);
+  onJoined(handler: (msg: Message<JoinedMsgData>) => void) {
+    this.register(SystemMsgType.JOINED, handler as HandlerFunc);
   }
 
-  onLeft(handler: (msg: Message) => void) {
-    this.register(SystemMsgType.LEFT, handler);
+  onLeft(handler: (msg: Message<LeftMsgData>) => void) {
+    this.register(SystemMsgType.LEFT, handler as HandlerFunc);
+  }
+
+  onReady(handler: (msg: Message<ReadyMsgData>) => void) {
+    this.register(SystemMsgType.LEFT, handler as HandlerFunc);
   }
 
   onStart(handler: (msg: Message) => void) {
-    this.register(SystemMsgType.START, handler);
+    this.register(SystemMsgType.START, handler as HandlerFunc);
   }
 
   private useLogger() {
