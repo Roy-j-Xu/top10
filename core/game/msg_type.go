@@ -6,9 +6,10 @@ type GameMsgType string
 
 const (
 	G_BROADCAST      GameMsgType = "topten:broadcast"
-	G_NEW_QUESTIONS  GameMsgType = "topten:new-questions"
+	G_TURN_INFO      GameMsgType = "topten:turn-info"
 	G_SET_QUESTION   GameMsgType = "topten:set-question"
 	G_ASSIGN_NUMBERS GameMsgType = "topten:assign-numbers"
+	G_REVEAL_NUMBER  GameMsgType = "topten:reveal-number"
 	G_FINISHED       GameMsgType = "topten:finished"
 	G_ERROR          GameMsgType = "topten:error"
 

@@ -40,7 +40,7 @@ func SystemMsgOf(msgType SystemMsgType, msg any) Message {
 type DebugMessenger struct{}
 
 func (d *DebugMessenger) Broadcast(msg Message) {
-	data, err := json.Marshal(msg.Msg)
+	data, err := stringify(msg.Msg)
 	if err != nil {
 		log.Println(err.Error())
 	}
@@ -48,9 +48,26 @@ func (d *DebugMessenger) Broadcast(msg Message) {
 }
 
 func (d *DebugMessenger) Message(msg Message, playerID string) {
-	data, err := json.Marshal(msg.Msg)
+	data, err := stringify(msg.Msg)
 	if err != nil {
 		log.Println(err.Error())
 	}
 	log.Printf("[Message to %s] (%s) %s\n", playerID, msg.Type, string(data))
+}
+
+func stringify(input any) (string, error) {
+	var out string
+
+	switch v := input.(type) {
+	case string:
+		out = v
+	default:
+		data, err := json.MarshalIndent(v, "", "  ")
+		if err != nil {
+			return "", err
+		}
+		out = string(data)
+	}
+
+	return out, nil
 }

@@ -78,6 +78,13 @@ func (g *Game) Start() {
 func (g *Game) nextTurn() {
 	g.TurnNumber++
 	g.GuesserID = g.TurnOrder[g.TurnNumber-1]
+	questions := RandomQuestions(4)
+	g.Room().Broadcast(GameMsgOf(G_TURN_INFO, TurnInfoResponse{
+		Turn:      g.TurnNumber,
+		Guesser:   g.GuesserID,
+		Questions: questions,
+	}))
+
 	g.setQuestion()
 	g.assignNumbers()
 	g.Room().WaitForAllMessages(string(GP_READY))
@@ -92,9 +99,8 @@ func (g *Game) assignNumbers() {
 	}
 }
 
+// wait for guesser to choose one question
 func (g *Game) setQuestion() {
-	questions := RandomQuestions(4)
-	g.Room().Message(GameMsgOf(G_NEW_QUESTIONS, questions), g.GuesserID)
 	setQsMsg, err := g.Room().WaitUntilGetMessage(g.GuesserID, string(GP_SET_QUESTION))
 	question, ok := setQsMsg.Msg.(string)
 	if err != nil || !ok {
