@@ -1,10 +1,11 @@
 import type { Game } from "./games/game";
-import { MessageHandler, MessageSender, SocketManager, type RoomInfoResponse } from "./message";
+import { MessageHandler, MessageSender, SocketManager, SystemPlayerMsgType, type RoomInfoResponse } from "./message";
 import { registeredGames } from "./registered_games";
 import config from "../../config.json"
 
 class GameService {
-  private socketManager = new SocketManager(); 
+  private socketManager = new SocketManager();
+  private handlers: Record<string, MessageHandler> = {};
   private sender?: MessageSender;
   private game?: Game;
   
@@ -16,7 +17,8 @@ class GameService {
 
     const resp = await this.newRoom(roomName, roomSize);
 
-    this.sender = new game.sender(this.socketManager);
+    this.initHandlers(game.handlerFactories);
+    this.sender = game.senderFactory(this.socketManager);
     this.game = game
     return resp;
   }
@@ -51,6 +53,13 @@ class GameService {
     }
     return await response.json();
   }
+
+  ready() {
+    this.socketManager.send({
+      type: SystemPlayerMsgType.READY,
+      msg: "ready",
+    })
+  }
   
   endGame() {
     this.game = undefined;
@@ -69,7 +78,13 @@ class GameService {
     if (this.game === undefined) {
       throw Error("game not found, unable to get handler");
     }
-    return this.game.handlers;
+    return this.handlers;
+  }
+
+  private initHandlers(factories: Record<string, () => MessageHandler>) {
+    this.handlers = Object.fromEntries(
+      Object.entries(factories).map(([key, factory]) => [key, factory()])
+    );
   }
 
 }

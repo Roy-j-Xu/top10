@@ -1,5 +1,6 @@
 import { SystemMsgType, type Message } from "./message_types";
 import type { SocketManager } from "./socket_manager";
+import { logMessage } from "./utils";
 
 export class MessageHandler {
   protected handlers: Map<string, Set<(msg: Message) => void>> = new Map();
@@ -54,10 +55,7 @@ export class SystemMessageHandler extends MessageHandler {
 
   private useLogger() {
     Object.values(SystemMsgType).forEach(type => {
-      if (type === SystemMsgType.SP_LEFT || type === SystemMsgType.SP_READY) {
-        return;
-      }
-      if (type === SystemMsgType.S_ERROR) {
+      if (type === SystemMsgType.ERROR) {
         this.register(type, (msg) => console.error(msg));
       }
       this.register(type, (msg) => logMessage(msg));
@@ -65,6 +63,3 @@ export class SystemMessageHandler extends MessageHandler {
   }
 }
 
-function logMessage(msg: Message) {
-  console.log(`[${msg.type}] ${msg.msg}`)
-}

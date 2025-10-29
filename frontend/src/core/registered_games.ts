@@ -1,12 +1,16 @@
 import type { Game } from "./games/game"
-import { MessageSender, SystemMessageHandler } from "./message"
+import { TopTenHandler, TopTenSender } from "./games/top10"
+import { SystemMessageHandler } from "./message"
 
 
 export const registeredGames: Record<string, Game> = {
   "Top10": {
     minSize: 3,
     maxSize: 10,
-    handlers: {"system": new SystemMessageHandler(true)},
-    sender: MessageSender,
+    handlerFactories: {
+      "system": () => new SystemMessageHandler(true),
+      "game": () => new TopTenHandler(),
+    },
+    senderFactory: (s) => new TopTenSender(s),
   },
 }

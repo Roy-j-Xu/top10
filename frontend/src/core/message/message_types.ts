@@ -8,14 +8,16 @@ export function messageNamespace(msg: Message) {
 }
 
 export const SystemMsgType = {
-  S_JOINED: "system:joined",
-  S_LEFT: "system:left",
-  S_START: "system:start",
-  S_BROADCAST: "system:broadcast",
-  S_ERROR: "system:error",
+  JOINED: "system:joined",
+  LEFT: "system:left",
+  START: "system:start",
+  BROADCAST: "system:broadcast",
+  ERROR: "system:error",
+} as const;
 
-  SP_READY: "system-player:ready",
-	SP_LEFT: "system-player:leave",
+export const SystemPlayerMsgType = {
+  READY: "system-player:ready",
+  LEFT: "system-player:leave",
 } as const;
 
 export interface RoomInfoResponse {
