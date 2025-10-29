@@ -1,6 +1,7 @@
 package core
 
 import (
+	"errors"
 	"fmt"
 	"log"
 	"sync"
@@ -10,27 +11,34 @@ import (
 
 type GameManager struct {
 	Rooms map[string]*room.Room
+	Games map[string]*game.Game
 	mutex sync.Mutex
 }
 
 func NewGameManager() *GameManager {
 	return &GameManager{
 		Rooms: make(map[string]*room.Room),
+		Games: make(map[string]*game.Game),
 	}
 }
 
 func (gm *GameManager) RunGame(roomName string) error {
 	gm.mutex.Lock()
-	defer gm.mutex.Unlock()
 	r, ok := gm.Rooms[roomName]
 	if !ok {
 		return fmt.Errorf("running game in room %s: %w", roomName, room.ErrRoomNotFound)
 	}
-	if r.InGame {
-		return fmt.Errorf("running game in room %s: %w", roomName, room.ErrInvalidRoom)
-	}
 	game := game.NewGame(r)
-	go game.Start()
+	gm.Games[roomName] = game
+	gm.mutex.Unlock()
+
+	game.Start() // game starts here
+
+	gm.mutex.Lock()
+	delete(gm.Games, roomName)
+	gm.mutex.Unlock()
+
+	log.Printf("game %s removed", roomName)
 	return nil
 }
 
@@ -51,7 +59,7 @@ func (gm *GameManager) NewRoomSync(roomName string, roomSize int) error {
 	go gm.watchRoom(room)
 	go func() {
 		room.WaitForStartSync()
-		game.NewGame(room)
+		gm.RunGame(roomName)
 	}()
 
 	return nil
@@ -73,5 +81,15 @@ func (gm *GameManager) GetRoomSync(roomID string) (*room.Room, error) {
 		return r, nil
 	} else {
 		return nil, room.ErrRoomNotFound
+	}
+}
+
+func (gm *GameManager) GetGameSync(roomID string) (*game.Game, error) {
+	gm.mutex.Lock()
+	defer gm.mutex.Unlock()
+	if r, ok := gm.Games[roomID]; ok {
+		return r, nil
+	} else {
+		return nil, errors.New("game not found")
 	}
 }

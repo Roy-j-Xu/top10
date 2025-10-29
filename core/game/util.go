@@ -13,6 +13,10 @@ func (g *Game) SetStatus(status *Status) {
 	g.Status.OnStatus(g)
 }
 
+func (g *Game) RepeatStatus() {
+	g.Status.OnStatus(g)
+}
+
 func (g *Game) Room() *room.Room {
 	return g.room
 }
@@ -27,6 +31,26 @@ func (g *Game) AddNewPlayerState(playerID string) error {
 	}
 	g.PlayerStates[playerID] = &PlayerState{}
 	return nil
+}
+
+func (g *Game) GetGameInfoUnsafe() GameInfoResponse {
+	return GameInfoResponse{
+		Turn:         g.TurnNumber,
+		Guesser:      g.GuesserID,
+		Questions:    g.Questions,
+		UsedQuestion: g.UsedQuestion,
+		State:        g.Status.Name,
+	}
+}
+
+func (g *Game) GetGameInfoSync() GameInfoResponse {
+	return GameInfoResponse{
+		Turn:         g.TurnNumber,
+		Guesser:      g.GuesserID,
+		Questions:    g.Questions,
+		UsedQuestion: g.UsedQuestion,
+		State:        g.Status.Name,
+	}
 }
 
 func randomKFromN(k, n int) []int {
@@ -53,7 +77,7 @@ func (g *Game) Print() {
 	log.Printf("Game status: %s", g.Status.Name)
 	log.Printf("Turn order: %v", g.TurnOrder)
 	log.Printf("Turn number: %d", g.TurnNumber)
-	log.Printf("Question: %s", g.Question)
+	log.Printf("Question: %s", g.UsedQuestion)
 	log.Printf("Guesser ID: %s", g.GuesserID)
 	log.Println("----------------------")
 	log.Println()

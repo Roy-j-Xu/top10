@@ -70,12 +70,36 @@ func handleRoomInfo(gm *core.GameManager) http.HandlerFunc {
 			return
 		}
 
+		rm.Lock()
+		defer rm.Unlock()
 		writeJson(w, RoomInfoResponse{
 			RoomName: rm.ID,
 			RoomSize: rm.MaxSize,
 			Game:     "Top10",
-			Players:  rm.GetAllPlayerIDsSync(),
+			Players:  rm.GetAllPlayerIDsUnsafe(),
+			InGame:   rm.InGame,
 		}, 200)
+	}
+}
+
+func handleGameInfo(gm *core.GameManager) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet {
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+			return
+		}
+
+		roomName := r.URL.Query().Get("roomName")
+
+		g, err := gm.GetGameSync(roomName)
+		if err != nil {
+			http.Error(w,
+				fmt.Sprintf("unable to find game \"%s\" or game not in play: %v", roomName, err),
+				http.StatusBadRequest)
+			return
+		}
+
+		writeJson(w, g.GetGameInfoSync(), 200)
 	}
 }
 

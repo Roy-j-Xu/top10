@@ -35,6 +35,14 @@ func (r *Room) GetAllPlayerIDsSync() []string {
 	return ids
 }
 
+func (r *Room) GetAllPlayerIDsUnsafe() []string {
+	ids := make([]string, 0, len(r.Players))
+	for id := range r.Players {
+		ids = append(ids, id)
+	}
+	return ids
+}
+
 func (r *Room) GetNumberOfReadiesSync() int {
 	r.Lock()
 	defer r.Unlock()

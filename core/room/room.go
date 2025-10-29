@@ -213,6 +213,6 @@ func (r *Room) WaitForStartSync() error {
 	r.InGame = true
 	r.Unlock()
 
-	r.Broadcast(SystemMsgOf(S_START, "all players are ready, game starting"))
+	r.Broadcast(SystemMsgOf(S_START, "all players are ready"))
 	return nil
 }

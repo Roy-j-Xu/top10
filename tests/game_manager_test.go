@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 	"top10/core"
+	"top10/core/room"
 	"top10/server"
 
 	"github.com/gorilla/websocket"
@@ -23,21 +24,7 @@ func TestCreateRoom(t *testing.T) {
 	ts := httptest.NewServer(http.DefaultServeMux)
 	defer ts.Close()
 
-	body, _ := json.Marshal(map[string]any{
-		"roomName": "test_room",
-		"roomSize": 4,
-	})
-	resp, err := http.Post(ts.URL+"/api/create-room", "application/json", bytes.NewReader(body))
-	if err != nil {
-		t.Fatalf("failed to make request: %v", err)
-	}
-	defer resp.Body.Close()
-
-	logResponse(t, resp)
-
-	if resp.StatusCode != http.StatusOK {
-		t.Fatalf("expected 200 OK, got %v", resp.Status)
-	}
+	createRoom(t, ts, "test_room")
 
 	// Check if the room exists
 	r, err := gm.GetRoomSync("test_room")
@@ -55,15 +42,7 @@ func TestJoinRoom(t *testing.T) {
 	ts := httptest.NewServer(http.DefaultServeMux)
 	defer ts.Close()
 
-	body, _ := json.Marshal(map[string]any{
-		"roomName": "test_room",
-		"roomSize": 4,
-	})
-	resp, err := http.Post(ts.URL+"/api/create-room", "application/json", bytes.NewReader(body))
-	if err != nil {
-		t.Fatalf("failed to make request: %v", err)
-	}
-	defer resp.Body.Close()
+	createRoom(t, ts, "test_room")
 
 	<-time.After(10 * time.Millisecond)
 
@@ -75,6 +54,44 @@ func TestJoinRoom(t *testing.T) {
 	wait10msAnd(func() { conn.Close() })
 
 	<-time.After(10 * time.Millisecond)
+}
+
+func TestReady(t *testing.T) {
+	gm := core.NewGameManager()
+	server.InitServer(gm)
+	ts := httptest.NewServer(http.DefaultServeMux)
+	defer ts.Close()
+
+	createRoom(t, ts, "test_room")
+
+	ws := joinRoom(t, ts, "test_room", "player1")
+
+	<-time.After(10 * time.Millisecond)
+
+	ws.WriteJSON(map[string]any{
+		"type": room.SP_READY,
+		"msg":  "",
+	})
+
+	<-time.After(10 * time.Millisecond)
+
+	g, err := gm.GetGameSync("test_room")
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Log(g.GetGameInfoSync())
+}
+
+func createRoom(t *testing.T, ts *httptest.Server, roomName string) {
+	body, _ := json.Marshal(map[string]any{
+		"roomName": roomName,
+		"roomSize": 4,
+	})
+	resp, err := http.Post(ts.URL+"/api/create-room", "application/json", bytes.NewReader(body))
+	if err != nil {
+		t.Fatalf("failed to make request: %v", err)
+	}
+	defer resp.Body.Close()
 }
 
 func joinRoom(t *testing.T, ts *httptest.Server, roomName string, playerName string) *websocket.Conn {

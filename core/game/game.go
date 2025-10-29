@@ -11,6 +11,7 @@ var (
 	Start = &Status{
 		Name: "Start",
 		OnStatus: func(g *Game) {
+			g.Room().Broadcast(GameMsgOf(G_START, "game starts"))
 			if g.Size() > 0 {
 				g.SetStatus(Playing)
 			}
@@ -24,7 +25,7 @@ var (
 				g.SetStatus(Finished)
 				return
 			} else {
-				g.Status.OnStatus(g)
+				g.RepeatStatus()
 			}
 		},
 	}
@@ -48,7 +49,8 @@ type Game struct {
 	MaxTurn      int
 	PlayerStates map[string]*PlayerState
 	GuesserID    string
-	Question     string
+	Questions    []string
+	UsedQuestion string
 
 	room *room.Room
 }
@@ -78,12 +80,8 @@ func (g *Game) Start() {
 func (g *Game) nextTurn() {
 	g.TurnNumber++
 	g.GuesserID = g.TurnOrder[g.TurnNumber-1]
-	questions := RandomQuestions(4)
-	g.Room().Broadcast(GameMsgOf(G_TURN_INFO, TurnInfoResponse{
-		Turn:      g.TurnNumber,
-		Guesser:   g.GuesserID,
-		Questions: questions,
-	}))
+	g.Questions = RandomQuestions(4)
+	g.Room().Broadcast(GameMsgOf(G_TURN_INFO, g.GetGameInfoSync()))
 
 	g.setQuestion()
 	g.assignNumbers()
@@ -107,6 +105,7 @@ func (g *Game) setQuestion() {
 		g.Room().Broadcast(GameMsgOf(G_ERROR, "error reading question message"))
 		g.Room().Shutdown()
 	}
-	g.Question = question
+	g.UsedQuestion = question
+	g.Questions = nil
 	g.Room().Broadcast(GameMsgOf(G_SET_QUESTION, question))
 }

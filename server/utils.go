@@ -21,4 +21,5 @@ type RoomInfoResponse struct {
 	RoomSize int      `json:"roomSize"`
 	Game     string   `json:"game"`
 	Players  []string `json:"players"`
+	InGame   bool     `json:"inGame"`
 }
