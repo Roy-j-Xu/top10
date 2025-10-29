@@ -84,7 +84,6 @@ func (r *Room) ListenPlayerReadySync(playerID string) error {
 	for {
 		select {
 		case <-r.ctx.Done():
-			r.Message(SystemMsgOf(S_LEFT, "you are disconnected from game"), playerID)
 			r.RemovePlayerSync(playerID)
 			return nil
 		case msg := <-player.readyChan:
@@ -134,8 +133,7 @@ func (r *Room) AddPlayerSync(playerID string, conn *websocket.Conn) error {
 		r.Players[playerID] = player
 		r.ResetTimerUnsafe() // use unsafe to prevent deadlock
 
-		go r.Broadcast(SystemMsgOf(S_JOINED, fmt.Sprintf("player \"%s\" joined", playerID)))
-		go r.Message(SystemMsgOf(S_JOINED, playerID), playerID)
+		go r.Broadcast(JoinedMsgOf(playerID, "player joined"))
 	}
 
 	go r.ListenPlayerReadySync(playerID)
@@ -154,7 +152,7 @@ func (r *Room) RejoinPlayerSync(playerID string, conn *websocket.Conn) error {
 	r.Players[playerID].Conn = conn
 	r.ResetTimerUnsafe() // use unsafe to prevent deadlock
 
-	go r.Broadcast(SystemMsgOf(S_JOINED, fmt.Sprintf("player \"%s\" rejoined", playerID)))
+	go r.Broadcast(JoinedMsgOf(playerID, "player joined"))
 	return nil
 }
 
@@ -167,7 +165,7 @@ func (r *Room) RemovePlayerSync(playerID string) error {
 	}
 	delete(r.Players, playerID)
 
-	go r.Broadcast(SystemMsgOf(S_LEFT, fmt.Sprintf("player \"%s\" left", playerID)))
+	go r.Broadcast(LeftMsgOf(playerID, "player disconnected"))
 
 	return nil
 }
@@ -190,8 +188,8 @@ func (r *Room) WaitAllSync() error {
 				player.Ready = true
 				numberOfReadies := r.GetNumberOfReadiesSync()
 				roomSize := r.SizeSync()
-				go r.Broadcast(SystemMsgOf(
-					S_BROADCAST,
+				go r.Broadcast(ReadyMsgOf(
+					playerID,
 					fmt.Sprintf("player \"%s\" is ready (%d/%d)", playerID, numberOfReadies, roomSize),
 				))
 				if numberOfReadies >= roomSize {

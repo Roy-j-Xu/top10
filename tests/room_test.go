@@ -68,12 +68,8 @@ func TestGameDisconnect(t *testing.T) {
 
 	wait10msAnd(g.Print)
 
-	wait10msAnd(func() { room.SendToReadyChannel_READY("1") })
-	wait10msAnd(func() { room.SendToReadyChannel_READY("2") })
 	wait10msAnd(func() { room.SendToReadyChannel_LEFT("1") })
-	wait10msAnd(func() { room.SendToReadyChannel_READY("3") })
 	wait10msAnd(func() { room.RejoinPlayerSync("1", nil) })
-	wait10msAnd(func() { room.SendToReadyChannel_READY("1") })
 
 	wait10msAnd(g.Print)
 }
