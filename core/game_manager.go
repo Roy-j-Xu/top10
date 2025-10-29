@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"log"
-	"net/http"
 	"sync"
 	"top10/core/game"
 	"top10/core/room"
@@ -18,13 +17,6 @@ func NewGameManager() *GameManager {
 	return &GameManager{
 		Rooms: make(map[string]*room.Room),
 	}
-}
-
-func (gm *GameManager) HandleHTTP() {
-	http.HandleFunc("/api/create-room", handleNewRoom(gm))
-	http.HandleFunc("/api/room-info", handleRoomInfo(gm))
-	// joining room and establish socket connection
-	http.HandleFunc("/ws", joinHandler(gm))
 }
 
 func (gm *GameManager) RunGame(roomName string) error {

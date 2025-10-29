@@ -2,9 +2,7 @@ package core
 
 import "top10/core/game"
 
-func InitCore() {
+func InitCore() *GameManager {
 	game.LoadQuestionSet()
-
-	gm := NewGameManager()
-	gm.HandleHTTP()
+	return NewGameManager()
 }

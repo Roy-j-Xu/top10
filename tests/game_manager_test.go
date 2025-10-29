@@ -10,13 +10,14 @@ import (
 	"testing"
 	"time"
 	"top10/core"
+	"top10/server"
 
 	"github.com/gorilla/websocket"
 )
 
 func TestCreateRoom(t *testing.T) {
 	gm := core.NewGameManager()
-	gm.HandleHTTP()
+	server.InitServer(gm)
 
 	// Create a test server using gm’s handlers
 	ts := httptest.NewServer(http.DefaultServeMux)
@@ -50,7 +51,7 @@ func TestCreateRoom(t *testing.T) {
 
 func TestJoinRoom(t *testing.T) {
 	gm := core.NewGameManager()
-	gm.HandleHTTP()
+	server.InitServer(gm)
 	ts := httptest.NewServer(http.DefaultServeMux)
 	defer ts.Close()
 

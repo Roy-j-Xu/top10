@@ -4,17 +4,13 @@ import (
 	"log"
 	"net/http"
 	"top10/core"
+	"top10/server"
 )
 
 func main() {
-	core.InitCore()
-
-	serveFrontend()
+	gm := core.InitCore()
+	server.InitServer(gm)
+	server.ServeFrontend()
 
 	log.Fatal(http.ListenAndServe("0.0.0.0:8000", nil))
-}
-
-func serveFrontend() {
-	fs := http.FileServer(http.Dir("./resource/frontend/dist"))
-	http.Handle("/", fs)
 }

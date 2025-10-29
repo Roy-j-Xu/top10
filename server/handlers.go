@@ -1,4 +1,4 @@
-package core
+package server
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"top10/core"
 	"top10/core/room"
 
 	"github.com/gorilla/websocket"
@@ -13,7 +14,7 @@ import (
 
 var validName = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,32}$`)
 
-func handleNewRoom(gm *GameManager) http.HandlerFunc {
+func handleNewRoom(gm *core.GameManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -54,7 +55,7 @@ func handleNewRoom(gm *GameManager) http.HandlerFunc {
 	}
 }
 
-func handleRoomInfo(gm *GameManager) http.HandlerFunc {
+func handleRoomInfo(gm *core.GameManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodGet {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -78,7 +79,7 @@ func handleRoomInfo(gm *GameManager) http.HandlerFunc {
 	}
 }
 
-func joinHandler(gm *GameManager) http.HandlerFunc {
+func joinHandler(gm *core.GameManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Parse room name from query or headers
 		roomName := r.URL.Query().Get("roomName")
