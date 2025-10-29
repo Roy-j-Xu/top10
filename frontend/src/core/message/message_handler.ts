@@ -12,10 +12,6 @@ export class MessageHandler {
     };
   }
 
-  debug() {
-    console.log(this.handlers)
-  }
-
   register(msgType: string, handler: (msg: Message) => void): () => void {
     if (!this.handlers.has(msgType)) {
       this.handlers.set(msgType, new Set());
@@ -51,6 +47,18 @@ export class SystemMessageHandler extends MessageHandler {
     if (useLogger) {
       this.useLogger()
     }
+  }
+
+  onJoined(handler: (msg: Message) => void) {
+    this.register(SystemMsgType.JOINED, handler);
+  }
+
+  onLeft(handler: (msg: Message) => void) {
+    this.register(SystemMsgType.LEFT, handler);
+  }
+
+  onStart(handler: (msg: Message) => void) {
+    this.register(SystemMsgType.START, handler);
   }
 
   private useLogger() {

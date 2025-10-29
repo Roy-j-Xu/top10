@@ -1,11 +1,14 @@
 import { useState, type ChangeEvent } from "react";
 import gameService from "../core/game_service";
 import type { RoomInfoResponse } from "../core";
+import { useNavigate } from "react-router-dom";
 
 export default function Main() {
   const [roomName, setRoomName] = useState("");
   const [playerName, setPlayerName] = useState("");
   const [roomInfo, setRoomInfo] = useState<RoomInfoResponse>();
+
+  const navigate = useNavigate();
 
   function handleInputChange(setter: (input: string) => void) {
     return (e: ChangeEvent<HTMLInputElement>) => {
@@ -18,6 +21,7 @@ export default function Main() {
       await gameService.newGame(roomName, 4, "Top10");
       const info = await gameService.joinGame(roomName, playerName);
       setRoomInfo(info);
+      navigate(`/topten/${roomName}`);
     } catch (error) {
       console.error(error);
     }
@@ -27,6 +31,7 @@ export default function Main() {
     try {
       const info = await gameService.joinGame(roomName, playerName);
       setRoomInfo(info);
+      navigate(`/topten/${roomName}`);
     } catch (error) {
       console.error(error)
     }

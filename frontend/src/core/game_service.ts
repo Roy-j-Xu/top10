@@ -38,10 +38,15 @@ class GameService {
 
   async joinGame(roomName: string, playerName: string): Promise<RoomInfoResponse> {
     const data = await this.getRoomInfo(roomName);
-    this.game = registeredGames[data.game]
+    const game = registeredGames[data.game]
+    if (!game) {
+      throw Error("game not found")
+    }
+    this.game = game;
+
     this.socketManager.connect(
       `${config["socketUrl"]}?roomName=${roomName}&playerName=${playerName}`,
-      ...Object.values(this.getHandlers()),
+      ...Object.values(this.handlers),
     );
     return data;
   }
@@ -74,11 +79,11 @@ class GameService {
     return this.sender as S;
   }
 
-  getHandlers(): Record<string, MessageHandler> {
+  getHandler<H extends MessageHandler>(name: string): H {
     if (this.game === undefined) {
       throw Error("game not found, unable to get handler");
     }
-    return this.handlers;
+    return this.handlers[name] as H;
   }
 
   private initHandlers(factories: Record<string, () => MessageHandler>) {
