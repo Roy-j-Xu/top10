@@ -8,7 +8,7 @@ class GameService {
   private handlers: Record<string, MessageHandler> = {};
   private sender?: MessageSender;
   private game?: Game;
-  
+
   async newGame(roomName: string, roomSize: number, gameName: string): Promise<RoomInfoResponse> {
     const game = registeredGames[gameName];
     if (roomSize < game.minSize || game.maxSize < roomSize) {
@@ -21,24 +21,6 @@ class GameService {
     return resp;
   }
 
-  private initServiceForGame(game: Game) {
-    this.initHandlers(game.handlerFactories);
-    this.sender = game.senderFactory(this.socketManager);
-    this.game = game;
-  } 
-
-  private async newRoom(roomName: string, roomSize: number): Promise<RoomInfoResponse> {
-    const body = JSON.stringify({ roomName: roomName, roomSize: roomSize});
-    const response = await fetch(`${config["apiUrl"]}/create-room`, {
-      method: "POST",
-      body: body,
-    });
-    if (!response.ok) {
-      throw Error(`creating room: ${JSON.stringify(response)}`);
-    }
-    return await response.json();
-  }
-
   async joinGame(roomName: string, playerName: string): Promise<RoomInfoResponse> {
     const data = await this.getRoomInfo(roomName);
     const game = registeredGames[data.game]
@@ -49,11 +31,12 @@ class GameService {
 
     this.socketManager.connect(
       `${config["socketUrl"]}?roomName=${roomName}&playerName=${playerName}`,
+      this.leaveGame,
       ...Object.values(this.handlers),
     );
     return data;
   }
-
+  
   async getRoomInfo(roomName: string): Promise<RoomInfoResponse> {
     const response = await fetch(`${config["apiUrl"]}/room-info?roomName=${roomName}`);
     if (!response.ok) {
@@ -73,19 +56,19 @@ class GameService {
     })
   }
   
-  endGame() {
+  leaveGame() {
     this.game = undefined;
     this.sender = undefined;
-    this.socketManager.close();
+    this.socketManager?.close();
   }
-
+  
   getSender<S extends MessageSender>(): S {
     if (this.game === undefined) {
       throw Error("game not found, unable to get sender");
     }
     return this.sender as S;
   }
-
+  
   getHandler<H extends MessageHandler>(name: string): H {
     if (this.game === undefined) {
       throw Error("game not found, unable to get handler");
@@ -97,6 +80,24 @@ class GameService {
     this.handlers = Object.fromEntries(
       Object.entries(factories).map(([key, factory]) => [key, factory()])
     );
+  }
+  
+  private initServiceForGame(game: Game) {
+    this.initHandlers(game.handlerFactories);
+    this.sender = game.senderFactory(this.socketManager);
+    this.game = game;
+  } 
+
+  private async newRoom(roomName: string, roomSize: number): Promise<RoomInfoResponse> {
+    const body = JSON.stringify({ roomName: roomName, roomSize: roomSize});
+    const response = await fetch(`${config["apiUrl"]}/create-room`, {
+      method: "POST",
+      body: body,
+    });
+    if (!response.ok) {
+      throw Error(`creating room: ${JSON.stringify(response)}`);
+    }
+    return await response.json();
   }
 
 }

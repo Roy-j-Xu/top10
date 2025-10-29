@@ -26,6 +26,7 @@ export interface RoomInfoResponse {
 	roomSize: number,
 	game:     string,
 	players:  string[],
+  inGame:   boolean,
 }
 
 interface PlayerMsgData {

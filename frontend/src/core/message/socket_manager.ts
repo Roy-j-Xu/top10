@@ -12,7 +12,7 @@ export class SocketManager {
     this.subscribers.forEach(s => s.createHandler()(msg));
   }
 
-  connect(url: string, ...msgManagers: MessageHandler[]) {
+  connect(url: string, onClose: () => void, ...msgManagers: MessageHandler[]) {
     if (this.isConnected) {
       return;
     }
@@ -30,10 +30,7 @@ export class SocketManager {
       console.log('connected to server');
     };
 
-    this.ws.onclose = () => {
-      this.isConnected = false;
-      console.log('disconnected from server');
-    };
+    this.ws.onclose = onClose;
 
     this.ws.onerror = (err) => {
       console.error('webSocket error', err);
@@ -56,6 +53,9 @@ export class SocketManager {
   }
 
   close() {
+    if (!this.isConnected) {
+      return;
+    }
     this.ws.close();
     this.subscribers.forEach(s => this.unsubscribe(s));
     this.isConnected = false;

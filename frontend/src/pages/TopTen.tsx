@@ -6,9 +6,38 @@ import { useParams } from "react-router-dom";
 
 export function TopTen() {
   const { roomName, playerName } = useParams();
-  
-  const gameMsgHandler = gameService.getHandler<TopTenHandler>("game");
-  const systemMsgHandler = gameService.getHandler<SystemMessageHandler>("system");
+
+  const [connected, setConnected] = useState<boolean>(false);
+
+  // reconnect for mobil platforms
+  useEffect(() => {
+    if (!roomName || !playerName) { return; }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        if (!gameService.isJoined()) {
+          gameService.joinGame(roomName, playerName);
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    return () => document.removeEventListener("visibilitychange", handleVisibilityChange);
+  }, [playerName, roomName]);
+
+  // join game if not already in
+  useEffect(() => {
+    if (!roomName || !playerName) { return; }
+    if (!gameService.isJoined()) {
+      gameService.joinGame(roomName, playerName)
+        .then(() => {
+          setConnected(true);
+          window.addEventListener("beforeunload", gameService.leaveGame);
+        })
+    } else {
+      setConnected(true);
+    }
+  }, [playerName, roomName]);
 
   if (!roomName || !playerName) {
     return <h1>404 - Invalid room name or player name</h1>;
@@ -16,23 +45,21 @@ export function TopTen() {
 
   return (
     <GameBoard 
+      connected={connected}
       roomName={roomName}
       playerName={playerName}
-      gameMsgHandler={gameMsgHandler}
-      sysMsgHandler={systemMsgHandler}
     />
   )
 }
 
 interface GameBoardParam {
+  connected: boolean;
   roomName: string;
   playerName: string;
-  gameMsgHandler: TopTenHandler;
-  sysMsgHandler: SystemMessageHandler;
 }
 
 function GameBoard(params: GameBoardParam) {
-  const { roomName, playerName, gameMsgHandler, sysMsgHandler } = params;
+  const { connected, roomName, playerName } = params;
 
   const [playerNum, setPlayerNum] = useState(1);
   const [roomInfo, setRoomInfo] = useState<RoomInfoResponse>();
@@ -40,6 +67,12 @@ function GameBoard(params: GameBoardParam) {
 
   // update message handlers
   useEffect(() => {
+    if (!connected) {
+      return;
+    }
+
+    const gameMsgHandler = gameService.getHandler<TopTenHandler>("game");
+    const sysMsgHandler = gameService.getHandler<SystemMessageHandler>("system")
     sysMsgHandler.onJoined((msg) => {
       console.log(msg.msg.playerName);
       setPlayerNum(prev => prev + 1);
@@ -51,17 +84,23 @@ function GameBoard(params: GameBoardParam) {
     gameMsgHandler.onTurnInfo((msg) => {
       setTurnInfo(msg.msg);
     })
-    window.addEventListener("beforeunload", gameService.endGame);
-  }, [gameMsgHandler, sysMsgHandler]);
+  }, [connected]);
   
   // get room info
   useEffect(() => {
+    if (!connected) {
+      return;
+    }
     gameService.getRoomInfo(roomName)
       .then(info => {
         setPlayerNum(info.players.length);
         setRoomInfo(info);
       });
-  }, [roomName]);
+  }, [connected, roomName]);
+
+  if (!connected) {
+    return <h1>connecting</h1>;
+  }
 
   return (
     <div>
