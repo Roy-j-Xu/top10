@@ -1,7 +1,7 @@
 import type { Game } from "./games/game";
 import { MessageHandler, MessageSender, SocketManager, SystemPlayerMsgType, type RoomInfo } from "./message";
 import { registeredGames } from "./registered_games";
-import config from "../../config.json"
+import config from "../../config.ts"
 
 class GameService {
   private socketManager = new SocketManager();

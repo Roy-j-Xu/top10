@@ -16,8 +16,14 @@ export function TopTen() {
     const handleVisibilityChange = () => {
       if (document.visibilityState === "visible") {
         if (!gameService.isJoined()) {
-          gameService.joinGame(roomName, playerName);
-        }
+          gameService.joinGame(roomName, playerName)
+            .then(() => {
+              setConnected(true);
+              window.addEventListener("beforeunload", gameService.leaveGame);
+            }).catch((e) => alert(e));
+          } else {
+            setConnected(true);
+          }
       }
     };
 
@@ -33,7 +39,7 @@ export function TopTen() {
         .then(() => {
           setConnected(true);
           window.addEventListener("beforeunload", gameService.leaveGame);
-        })
+        }).catch((e) => alert(e));
     } else {
       setConnected(true);
     }
@@ -120,7 +126,7 @@ function GameBoard(params: GameBoardParam) {
 
 
   if (!connected) {
-    return <h1>connecting</h1>;
+    return <h1>Not connected</h1>;
   }
 
   if (finished) {

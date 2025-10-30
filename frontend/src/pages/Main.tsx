@@ -1,12 +1,10 @@
 import { useState, type ChangeEvent } from "react";
 import gameService from "../core/game_service";
-import type { RoomInfo } from "../core";
 import { useNavigate } from "react-router-dom";
 
 export default function Main() {
   const [roomName, setRoomName] = useState("");
   const [playerName, setPlayerName] = useState("");
-  const [roomInfo, setRoomInfo] = useState<RoomInfo>();
 
   const navigate = useNavigate();
 
@@ -19,8 +17,6 @@ export default function Main() {
   const handleCreateRoom = async () => {
     try {
       await gameService.newGame(roomName, 4, "Top10");
-      const info = await gameService.joinGame(roomName, playerName);
-      setRoomInfo(info);
       navigate(`/topten/${roomName}/${playerName}`);
     } catch (error) {
       console.error(error);
@@ -47,13 +43,6 @@ export default function Main() {
       />
       <button onClick={handleCreateRoom}>create room</button>
       <button onClick={handleJoinRoom}>join room</button>
-
-      {roomInfo && (
-        <div>
-          <h3>Room info:</h3>
-          <pre>{JSON.stringify(roomInfo, null, 2)}</pre>
-        </div>
-      )}
     </div>
   );
 };
