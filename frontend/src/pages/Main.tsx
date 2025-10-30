@@ -1,12 +1,12 @@
 import { useState, type ChangeEvent } from "react";
 import gameService from "../core/game_service";
-import type { RoomInfoResponse } from "../core";
+import type { RoomInfo } from "../core";
 import { useNavigate } from "react-router-dom";
 
 export default function Main() {
   const [roomName, setRoomName] = useState("");
   const [playerName, setPlayerName] = useState("");
-  const [roomInfo, setRoomInfo] = useState<RoomInfoResponse>();
+  const [roomInfo, setRoomInfo] = useState<RoomInfo>();
 
   const navigate = useNavigate();
 

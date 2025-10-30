@@ -21,7 +21,7 @@ export const SystemPlayerMsgType = {
   LEFT: "system-player:leave",
 } as const;
 
-export interface RoomInfoResponse {
+export interface RoomInfo {
   roomName: string,
 	roomSize: number,
 	game:     string,
@@ -31,7 +31,7 @@ export interface RoomInfoResponse {
 
 interface PlayerMsgData {
   playerName: string;
-  message: string;
+  roomInfo: RoomInfo;
 }
 
 export type {

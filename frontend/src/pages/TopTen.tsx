@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
-import type { TopTenHandler, TopTenSender, TurnInfoMsgData } from "../core/games/top10";
-import type { RoomInfoResponse, SystemMessageHandler } from "../core";
+import type { TopTenHandler, TopTenSender, GameInfo } from "../core/games/top10";
+import type { RoomInfo, SystemMessageHandler } from "../core";
 import gameService from "../core/game_service";
 import { useParams } from "react-router-dom";
 
@@ -44,27 +44,32 @@ export function TopTen() {
   }
 
   return (
-    <GameBoard 
-      connected={connected}
-      roomName={roomName}
-      playerName={playerName}
-    />
+    <>
+      <nav>
+        <div>room: {roomName}</div>
+        <div>player: {playerName}</div>
+      </nav>
+      <GameBoard 
+        connected={connected}
+        playerName={playerName}
+      />
+    </>
   )
 }
 
 interface GameBoardParam {
   connected: boolean;
-  roomName: string;
   playerName: string;
 }
 
 function GameBoard(params: GameBoardParam) {
-  const { connected, roomName, playerName } = params;
+  const { connected, playerName } = params;
 
-  const [playerNum, setPlayerNum] = useState(1);
-  const [isStart, setIsStart] = useState(false);
-  const [roomInfo, setRoomInfo] = useState<RoomInfoResponse>();
-  const [turnInfo, setTurnInfo] = useState<TurnInfoMsgData>();
+  const [log, setLog] = useState("");
+  const [inGame, setInGame] = useState(false);
+  const [finished, setFinished] = useState(false);
+  const [roomInfo, setRoomInfo] = useState<RoomInfo>();
+  const [gameInfo, setGameInfo] = useState<GameInfo>();
 
   // update message handlers
   useEffect(() => {
@@ -72,62 +77,114 @@ function GameBoard(params: GameBoardParam) {
       return;
     }
 
-    const gameMsgHandler = gameService.getHandler<TopTenHandler>("game");
     const sysMsgHandler = gameService.getHandler<SystemMessageHandler>("system")
 
-    sysMsgHandler.onJoined(() => {
-      setPlayerNum(prev => prev + 1);
+    sysMsgHandler.onJoined((msg) => {
+      setRoomInfo(msg.msg.roomInfo);
+      setLog(`Player "${msg.msg.playerName}" has joined`);
     });
-    sysMsgHandler.onLeft(() => {
-      setPlayerNum(prev => prev - 1);
-    })
-    gameMsgHandler.onTurnInfo((msg) => {
-      setTurnInfo(msg.msg);
-    })
-    gameMsgHandler.onStart(() => {
-      setIsStart(true);
-    })
+    sysMsgHandler.onLeft((msg) => {
+      setRoomInfo(msg.msg.roomInfo);
+      setLog(`Player "${msg.msg.playerName}" has joined`);
+    });
+    sysMsgHandler.onReady((msg) => {
+      const newRoomInfo = msg.msg.roomInfo;
+      setRoomInfo(newRoomInfo);
+      setLog(`Player "${msg.msg.playerName}" ready for game (${newRoomInfo.players.length}/${newRoomInfo.roomSize})`);
+    });
   }, [connected]);
-  
-  // get room info
+
+  // update game message handlers
   useEffect(() => {
     if (!connected) {
       return;
     }
-    gameService.getRoomInfo(roomName)
-      .then(info => {
-        setPlayerNum(info.players.length);
-        setRoomInfo(info);
-      });
-  }, [connected, roomName]);
+
+    const gameMsgHandler = gameService.getHandler<TopTenHandler>("game");
+
+    gameMsgHandler.onGameInfo((msg) => {
+      setGameInfo(msg.msg);
+    });
+    gameMsgHandler.onStart((msg) => {
+      setGameInfo(msg.msg);
+      setInGame(true);
+      setLog("Game starts")
+    });
+    gameMsgHandler.onStartGuessing((msg) => {
+      setGameInfo(msg.msg);
+      setLog("Start guessing")
+      console.log(msg.msg.numbers);
+    });
+    gameMsgHandler.onFinished(() => setFinished(true));
+  }, [connected]);
+
 
   if (!connected) {
     return <h1>connecting</h1>;
   }
 
+  if (finished) {
+    return <h1>Game finished</h1>;
+  }
+
+  const isGuesser: boolean = gameInfo?.guesser === playerName;
+
   return (
     <div>
       <h1>Top10</h1>
-      <div>You are playing as: {playerName}</div>
-      <div>
-        {turnInfo?.questions.map((question, index) => (
-          <div key={`question-${index}`}>
-            {question}
-            <button 
-              onClick={() => gameService.getSender<TopTenSender>().setQuestion(question)}>
-                choose this question
-            </button>
-          </div>))}
-      </div>
-      <div>{JSON.stringify(roomInfo)}</div>
-      <div>Number of players: {playerNum}</div>
-      <div>{JSON.stringify(turnInfo)}</div>
-      {isStart? (
+
+      {gameInfo? <h3>Turn {gameInfo.turn}/{gameInfo.maxTurn}</h3> : <></>}
+
+      {isGuesser? 
+        <Questions questions={gameInfo?.questions}/> : <></>
+      }
+
+      {gameInfo?.usedQuestion ? 
+        <div>Question: {gameInfo?.usedQuestion}</div> : <></>
+      }
+
+      <div>Players: {roomInfo?.players.join(", ")}</div>
+
+      {isGuesser?
+        <h2>You are the guesser</h2> : <h2>Guesser: {gameInfo?.guesser}</h2>
+      }
+      
+      {gameInfo?.numbers[playerName] ? <h2>Your Number: {gameInfo?.numbers[playerName]}</h2> : <></>}
+
+      {inGame ? (
         <button onClick={() => gameService.getSender<TopTenSender>().ready()}>Ready</button>
       ) : (
         <button onClick={() => gameService.ready()}>Start Game</button>
-      )
-      }
+      )}
+
+      <div>{log}</div>
     </div>
-  )
+  );
+}
+
+interface QuestionsParam {
+  questions?: string[];
+}
+
+function Questions(params: QuestionsParam) {
+  const { questions } = params;
+  if (!questions) {
+    return <></>;
+  }
+
+  if (questions) {
+    return (
+      <div>
+        {questions.map((question, index) => (
+        <div key={`question-${index}`}>
+          {question}
+          <button 
+            onClick={() => gameService.getSender<TopTenSender>().setQuestion(question)}>
+              choose this question
+          </button>
+        </div>))}
+      </div>
+    );
+  }
+
 }

@@ -3,9 +3,8 @@
 export const TopTenMsgType = {
   BROADCAST      : "topten:broadcast",
   START          : "topten:start",
-  TURN_INFO      : "topten:turn-info",
-  SET_QUESTION   : "topten:set-question",
-  ASSIGN_NUMBERS : "topten:assign-numbers",
+  GAME_INFO      : "topten:game-info",
+  START_GUESSING   : "topten:start-guessing",
   REVEAL_NUMBER  : "topten:reveal-number",
   FINISHED       : "topten:finished",
   ERROR          : "topten:error",
@@ -17,8 +16,13 @@ export const TopTenPlayerMsgType = {
   CHOOSE_ORDER : "topten-player:choose-order",
 }
 
-export interface TurnInfoMsgData {
+export interface GameInfo {
   turn: number;
+  maxTurn: number;
+  turnOrder: string[];
   guesser: string;
   questions: string[];
+  usedQuestion: string;
+  numbers: Record<string, number>;
+  state: string;
 }

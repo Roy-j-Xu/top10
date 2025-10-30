@@ -49,6 +49,8 @@ export class SocketManager {
 
   send(msg: Message | string) {
     if (!this.isConnected) throw new Error('WebSocket not connected');
+    console.log("sending message:");
+    console.log(msg);
     this.ws.send(JSON.stringify(msg));
   }
 

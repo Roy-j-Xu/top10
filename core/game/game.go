@@ -32,7 +32,7 @@ var (
 	Finished = &Status{
 		Name: "Finished",
 		OnStatus: func(g *Game) {
-			g.Room().Broadcast(GameMsgOf(G_FINISHED, g.GetGameInfoUnsafe()))
+			g.Room().Broadcast(GameMsgOf(G_FINISHED, ""))
 		},
 	}
 )
@@ -85,6 +85,7 @@ func (g *Game) nextTurn() {
 
 	g.setQuestion()
 	g.assignNumbers()
+	g.Room().Broadcast(GameMsgOf(G_START_GUESSING, g.GetGameInfoUnsafe()))
 	g.Room().WaitForAllMessages(string(GP_READY))
 }
 
@@ -94,7 +95,6 @@ func (g *Game) assignNumbers() {
 		playerNumber := numbers[k]
 		g.PlayerNumbers[playerID] = playerNumber
 	}
-	g.Room().Broadcast(GameMsgOf(G_ASSIGN_NUMBERS, g.GetGameInfoUnsafe()))
 }
 
 // wait for guesser to choose one question
@@ -107,5 +107,4 @@ func (g *Game) setQuestion() {
 	}
 	g.UsedQuestion = question
 	g.Questions = nil
-	g.Room().Broadcast(GameMsgOf(G_SET_QUESTION, g.GetGameInfoUnsafe()))
 }

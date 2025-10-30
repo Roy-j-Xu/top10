@@ -1,5 +1,5 @@
 import type { Game } from "./games/game";
-import { MessageHandler, MessageSender, SocketManager, SystemPlayerMsgType, type RoomInfoResponse } from "./message";
+import { MessageHandler, MessageSender, SocketManager, SystemPlayerMsgType, type RoomInfo } from "./message";
 import { registeredGames } from "./registered_games";
 import config from "../../config.json"
 
@@ -9,7 +9,7 @@ class GameService {
   private sender?: MessageSender;
   private game?: Game;
 
-  async newGame(roomName: string, roomSize: number, gameName: string): Promise<RoomInfoResponse> {
+  async newGame(roomName: string, roomSize: number, gameName: string): Promise<RoomInfo> {
     const game = registeredGames[gameName];
     if (roomSize < game.minSize || game.maxSize < roomSize) {
       throw Error("invalid room size for game");
@@ -21,7 +21,7 @@ class GameService {
     return resp;
   }
 
-  async joinGame(roomName: string, playerName: string): Promise<RoomInfoResponse> {
+  async joinGame(roomName: string, playerName: string): Promise<RoomInfo> {
     const data = await this.getRoomInfo(roomName);
     const game = registeredGames[data.game]
     if (!game) {
@@ -37,7 +37,7 @@ class GameService {
     return data;
   }
   
-  async getRoomInfo(roomName: string): Promise<RoomInfoResponse> {
+  async getRoomInfo(roomName: string): Promise<RoomInfo> {
     const response = await fetch(`${config["apiUrl"]}/room-info?roomName=${roomName}`);
     if (!response.ok) {
       throw Error(`creating room: ${JSON.stringify(response)}`);
@@ -88,7 +88,7 @@ class GameService {
     this.game = game;
   } 
 
-  private async newRoom(roomName: string, roomSize: number): Promise<RoomInfoResponse> {
+  private async newRoom(roomName: string, roomSize: number): Promise<RoomInfo> {
     const body = JSON.stringify({ roomName: roomName, roomSize: roomSize});
     const response = await fetch(`${config["apiUrl"]}/create-room`, {
       method: "POST",
