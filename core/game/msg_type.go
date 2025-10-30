@@ -19,6 +19,17 @@ const (
 	GP_CHOOSE_ORDER GameMsgType = "topten-player:choose-order"
 )
 
+type GameInfo struct {
+	Turn         int            `json:"turn"`
+	MaxTurn      int            `json:"maxTurn"`
+	TurnOrder    []string       `json:"turnOrder"`
+	Guesser      string         `json:"guesser"`
+	Questions    []string       `json:"questions"`
+	UsedQuestion string         `json:"usedQuestion"`
+	Numbers      map[string]int `json:"numbers"`
+	State        string         `json:"state"`
+}
+
 func GameMsgOf(msgType GameMsgType, msg any) room.Message {
 	return room.Message{
 		Type: string(msgType),

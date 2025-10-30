@@ -11,7 +11,7 @@ var (
 	Start = &Status{
 		Name: "Start",
 		OnStatus: func(g *Game) {
-			g.Room().Broadcast(GameMsgOf(G_START, "game starts"))
+			g.Room().Broadcast(GameMsgOf(G_START, g.GetGameInfoUnsafe()))
 			if g.Size() > 0 {
 				g.SetStatus(Playing)
 			}
@@ -32,7 +32,7 @@ var (
 	Finished = &Status{
 		Name: "Finished",
 		OnStatus: func(g *Game) {
-			g.Room().Broadcast(GameMsgOf(G_FINISHED, "game finished"))
+			g.Room().Broadcast(GameMsgOf(G_FINISHED, g.GetGameInfoUnsafe()))
 		},
 	}
 )
@@ -44,13 +44,13 @@ type PlayerState struct {
 type Game struct {
 	Status *Status
 
-	TurnOrder    []string
-	TurnNumber   int
-	MaxTurn      int
-	PlayerStates map[string]*PlayerState
-	GuesserID    string
-	Questions    []string
-	UsedQuestion string
+	TurnOrder     []string
+	TurnNumber    int
+	MaxTurn       int
+	PlayerNumbers map[string]int
+	GuesserID     string
+	Questions     []string
+	UsedQuestion  string
 
 	room *room.Room
 }
@@ -58,12 +58,12 @@ type Game struct {
 func NewGame(r *room.Room) *Game {
 	playerIDs := r.GetAllPlayerIDsSync()
 	game := &Game{
-		Status:       Start,
-		PlayerStates: make(map[string]*PlayerState),
-		TurnOrder:    playerIDs,
-		TurnNumber:   0,
-		MaxTurn:      len(playerIDs),
-		room:         r,
+		Status:        Start,
+		PlayerNumbers: make(map[string]int),
+		TurnOrder:     playerIDs,
+		TurnNumber:    0,
+		MaxTurn:       len(playerIDs),
+		room:          r,
 	}
 
 	for _, playerID := range playerIDs {
@@ -81,7 +81,7 @@ func (g *Game) nextTurn() {
 	g.TurnNumber++
 	g.GuesserID = g.TurnOrder[g.TurnNumber-1]
 	g.Questions = RandomQuestions(4)
-	g.Room().Broadcast(GameMsgOf(G_GAME_INFO, g.GetGameInfoSync()))
+	g.Room().Broadcast(GameMsgOf(G_GAME_INFO, g.GetGameInfoUnsafe()))
 
 	g.setQuestion()
 	g.assignNumbers()
@@ -92,9 +92,9 @@ func (g *Game) assignNumbers() {
 	numbers := randomKFromN(g.Size(), 10)
 	for k, playerID := range g.TurnOrder {
 		playerNumber := numbers[k]
-		g.PlayerStates[playerID].Number = playerNumber
-		g.Room().Message(GameMsgOf(G_ASSIGN_NUMBERS, playerNumber), playerID)
+		g.PlayerNumbers[playerID] = playerNumber
 	}
+	g.Room().Broadcast(GameMsgOf(G_ASSIGN_NUMBERS, g.GetGameInfoUnsafe()))
 }
 
 // wait for guesser to choose one question
@@ -107,5 +107,5 @@ func (g *Game) setQuestion() {
 	}
 	g.UsedQuestion = question
 	g.Questions = nil
-	g.Room().Broadcast(GameMsgOf(G_SET_QUESTION, question))
+	g.Room().Broadcast(GameMsgOf(G_SET_QUESTION, g.GetGameInfoUnsafe()))
 }

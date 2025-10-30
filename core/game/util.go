@@ -7,6 +7,18 @@ import (
 	"top10/core/room"
 )
 
+func (g *Game) GetGameInfoUnsafe() GameInfo {
+	return GameInfo{
+		Turn:         g.TurnNumber,
+		MaxTurn:      g.MaxTurn,
+		TurnOrder:    g.TurnOrder,
+		Guesser:      g.GuesserID,
+		Questions:    g.Questions,
+		UsedQuestion: g.UsedQuestion,
+		Numbers:      g.PlayerNumbers,
+	}
+}
+
 func (g *Game) SetStatus(status *Status) {
 	log.Printf("Game status: %s -> %s", g.Status.Name, status.Name)
 	g.Status = status
@@ -22,35 +34,15 @@ func (g *Game) Room() *room.Room {
 }
 
 func (g *Game) Size() int {
-	return len(g.PlayerStates)
+	return len(g.PlayerNumbers)
 }
 
 func (g *Game) AddNewPlayerState(playerID string) error {
-	if _, ok := g.PlayerStates[playerID]; ok {
+	if _, ok := g.PlayerNumbers[playerID]; ok {
 		return fmt.Errorf("player %s already has a game state", playerID)
 	}
-	g.PlayerStates[playerID] = &PlayerState{}
+	g.PlayerNumbers[playerID] = 0
 	return nil
-}
-
-func (g *Game) GetGameInfoUnsafe() GameInfoResponse {
-	return GameInfoResponse{
-		Turn:         g.TurnNumber,
-		Guesser:      g.GuesserID,
-		Questions:    g.Questions,
-		UsedQuestion: g.UsedQuestion,
-		State:        g.Status.Name,
-	}
-}
-
-func (g *Game) GetGameInfoSync() GameInfoResponse {
-	return GameInfoResponse{
-		Turn:         g.TurnNumber,
-		Guesser:      g.GuesserID,
-		Questions:    g.Questions,
-		UsedQuestion: g.UsedQuestion,
-		State:        g.Status.Name,
-	}
 }
 
 func randomKFromN(k, n int) []int {

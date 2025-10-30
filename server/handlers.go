@@ -16,9 +16,9 @@ var validName = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,32}$`)
 
 func handleNewRoom(gm *core.GameManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		// w.Header().Set("Access-Control-Allow-Origin", "*")
+		// w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		// w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -98,7 +98,7 @@ func handleGameInfo(gm *core.GameManager) http.HandlerFunc {
 			return
 		}
 
-		writeJson(w, g.GetGameInfoSync(), 200)
+		writeJson(w, g.GetGameInfoUnsafe(), 200)
 	}
 }
 

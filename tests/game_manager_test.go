@@ -79,7 +79,7 @@ func TestReady(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(g.GetGameInfoSync())
+	t.Log(g.GetGameInfoUnsafe())
 }
 
 func createRoom(t *testing.T, ts *httptest.Server, roomName string) {
