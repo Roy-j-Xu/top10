@@ -12,7 +12,7 @@ export default function Main() {
 
   function handleInputChange(setter: (input: string) => void) {
     return (e: ChangeEvent<HTMLInputElement>) => {
-      setter(e.target.value);
+      setter(e.target.value.trim());
     };
   }
 
@@ -28,13 +28,7 @@ export default function Main() {
   };
 
   const handleJoinRoom = async () => {
-    try {
-      const info = await gameService.joinGame(roomName, playerName);
-      setRoomInfo(info);
-      navigate(`/topten/${roomName}/${playerName}`);
-    } catch (error) {
-      console.error(error)
-    }
+    navigate(`/topten/${roomName}/${playerName}`);
   };
 
   return (

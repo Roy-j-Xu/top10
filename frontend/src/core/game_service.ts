@@ -59,7 +59,7 @@ class GameService {
   leaveGame() {
     this.game = undefined;
     this.sender = undefined;
-    this.socketManager?.close();
+    this.socketManager.close();
   }
   
   getSender<S extends MessageSender>(): S {

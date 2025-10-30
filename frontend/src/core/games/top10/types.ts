@@ -2,6 +2,7 @@
 
 export const TopTenMsgType = {
   BROADCAST      : "topten:broadcast",
+  START          : "topten:start",
   TURN_INFO      : "topten:turn-info",
   SET_QUESTION   : "topten:set-question",
   ASSIGN_NUMBERS : "topten:assign-numbers",

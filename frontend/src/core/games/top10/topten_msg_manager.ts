@@ -15,6 +15,10 @@ export class TopTenHandler extends MessageHandler {
     this.register(TopTenMsgType.ASSIGN_NUMBERS, handler);
   }
 
+  onStart(handler: HandlerFunc) {
+    this.register(TopTenMsgType.START, handler);
+  }
+
   useLogger() {
     Object.values(TopTenMsgType).forEach(type => {
       if (type === TopTenMsgType.ERROR) {
