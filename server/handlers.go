@@ -16,6 +16,10 @@ var validName = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,32}$`)
 
 func handleNewRoom(gm *core.GameManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
@@ -40,23 +44,22 @@ func handleNewRoom(gm *core.GameManager) http.HandlerFunc {
 			return
 		}
 
-		err := gm.NewRoomSync(req.Name, req.Size)
+		roomInfo, err := gm.NewRoomSync(req.Name, req.Size)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("could not create room: %v", err), http.StatusBadRequest)
 			return
 		}
 
-		writeJson(w, RoomInfoResponse{
-			RoomName: req.Name,
-			RoomSize: req.Size,
-			Game:     "Top10",
-			Players:  []string{},
-		}, 200)
+		writeJson(w, roomInfo, 200)
 	}
 }
 
 func handleRoomInfo(gm *core.GameManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// w.Header().Set("Access-Control-Allow-Origin", "*")
+		// w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		// w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
 		if r.Method != http.MethodGet {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
@@ -70,20 +73,16 @@ func handleRoomInfo(gm *core.GameManager) http.HandlerFunc {
 			return
 		}
 
-		rm.Lock()
-		defer rm.Unlock()
-		writeJson(w, RoomInfoResponse{
-			RoomName: rm.ID,
-			RoomSize: rm.MaxSize,
-			Game:     "Top10",
-			Players:  rm.GetAllPlayerIDsUnsafe(),
-			InGame:   rm.InGame,
-		}, 200)
+		writeJson(w, rm.GetRoomInfoSync(), 200)
 	}
 }
 
 func handleGameInfo(gm *core.GameManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// w.Header().Set("Access-Control-Allow-Origin", "*")
+		// w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		// w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
 		if r.Method != http.MethodGet {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
 			return
@@ -105,6 +104,10 @@ func handleGameInfo(gm *core.GameManager) http.HandlerFunc {
 
 func joinHandler(gm *core.GameManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// w.Header().Set("Access-Control-Allow-Origin", "*")
+		// w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		// w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+
 		// Parse room name from query or headers
 		roomName := r.URL.Query().Get("roomName")
 		playerID := r.URL.Query().Get("playerName")

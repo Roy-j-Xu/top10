@@ -15,11 +15,3 @@ func writeJson(w http.ResponseWriter, data any, status int) {
 		return
 	}
 }
-
-type RoomInfoResponse struct {
-	RoomName string   `json:"roomName"`
-	RoomSize int      `json:"roomSize"`
-	Game     string   `json:"game"`
-	Players  []string `json:"players"`
-	InGame   bool     `json:"inGame"`
-}

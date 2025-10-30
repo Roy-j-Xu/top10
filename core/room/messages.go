@@ -21,9 +21,17 @@ const (
 	SP_LEFT  SystemMsgType = "system-player:leave"
 )
 
+type RoomInfo struct {
+	RoomName string   `json:"roomName"`
+	RoomSize int      `json:"roomSize"`
+	Game     string   `json:"game"`
+	Players  []string `json:"players"`
+	InGame   bool     `json:"inGame"`
+}
+
 type playerMsgData struct {
-	PlayerName string `json:"playerName"`
-	Message    string `json:"message"`
+	PlayerName string   `json:"playerName"`
+	RoomInfo   RoomInfo `json:"roomInfo"`
 }
 
 type JoinedMsgData playerMsgData
@@ -37,32 +45,32 @@ func SystemMsgOf(msgType SystemMsgType, msg any) Message {
 	}
 }
 
-func JoinedMsgOf(playerName string, msg string) Message {
+func JoinedMsgOf(playerName string, roomInfo RoomInfo) Message {
 	return Message{
 		Type: string(S_JOINED),
 		Msg: JoinedMsgData{
 			PlayerName: playerName,
-			Message:    msg,
+			RoomInfo:   roomInfo,
 		},
 	}
 }
 
-func LeftMsgOf(playerName string, msg string) Message {
+func LeftMsgOf(playerName string, roomInfo RoomInfo) Message {
 	return Message{
 		Type: string(S_LEFT),
 		Msg: LeftMsgData{
 			PlayerName: playerName,
-			Message:    msg,
+			RoomInfo:   roomInfo,
 		},
 	}
 }
 
-func ReadyMsgOf(playerName string, msg string) Message {
+func ReadyMsgOf(playerName string, roomInfo RoomInfo) Message {
 	return Message{
-		Type: string(S_LEFT),
-		Msg: ReadyMsgData{
+		Type: string(S_READY),
+		Msg: LeftMsgData{
 			PlayerName: playerName,
-			Message:    msg,
+			RoomInfo:   roomInfo,
 		},
 	}
 }

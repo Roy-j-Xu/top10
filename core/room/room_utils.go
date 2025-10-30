@@ -5,6 +5,22 @@ import (
 	"log"
 )
 
+func (r *Room) GetRoomInfoUnsafe() RoomInfo {
+	return RoomInfo{
+		RoomName: r.ID,
+		RoomSize: r.Size(),
+		Game:     "Top10",
+		Players:  r.GetAllPlayerIDsUnsafe(),
+		InGame:   r.InGame,
+	}
+}
+
+func (r *Room) GetRoomInfoSync() RoomInfo {
+	r.Lock()
+	defer r.Unlock()
+	return r.GetRoomInfoUnsafe()
+}
+
 func (r *Room) Size() int {
 	return len(r.Players)
 }

@@ -42,27 +42,27 @@ func (gm *GameManager) RunGame(roomName string) error {
 	return nil
 }
 
-func (gm *GameManager) NewRoomSync(roomName string, roomSize int) error {
+func (gm *GameManager) NewRoomSync(roomName string, roomSize int) (room.RoomInfo, error) {
 	gm.mutex.Lock()
 	defer gm.mutex.Unlock()
 
 	if _, ok := gm.Rooms[roomName]; ok {
-		return fmt.Errorf("creating room %s: %w", roomName, room.ErrRoomExists)
+		return room.RoomInfo{}, fmt.Errorf("creating room %s: %w", roomName, room.ErrRoomExists)
 	}
 
-	room, err := room.NewRoomWebSocket(roomName, roomSize)
+	rm, err := room.NewRoomWebSocket(roomName, roomSize)
 	if err != nil {
-		return fmt.Errorf("creating room %s: %w", roomName, err)
+		return room.RoomInfo{}, fmt.Errorf("creating room %s: %w", roomName, err)
 	}
-	gm.Rooms[room.ID] = room
+	gm.Rooms[rm.ID] = rm
 
-	go gm.watchRoom(room)
+	go gm.watchRoom(rm)
 	go func() {
-		room.WaitForStartSync()
+		rm.WaitForStartSync()
 		gm.RunGame(roomName)
 	}()
 
-	return nil
+	return rm.GetRoomInfoUnsafe(), nil
 }
 
 // deletes room when its context is done

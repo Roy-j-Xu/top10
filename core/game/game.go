@@ -81,7 +81,7 @@ func (g *Game) nextTurn() {
 	g.TurnNumber++
 	g.GuesserID = g.TurnOrder[g.TurnNumber-1]
 	g.Questions = RandomQuestions(4)
-	g.Room().Broadcast(GameMsgOf(G_TURN_INFO, g.GetGameInfoSync()))
+	g.Room().Broadcast(GameMsgOf(G_GAME_INFO, g.GetGameInfoSync()))
 
 	g.setQuestion()
 	g.assignNumbers()

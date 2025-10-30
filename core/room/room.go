@@ -133,7 +133,7 @@ func (r *Room) AddPlayerSync(playerID string, conn *websocket.Conn) error {
 		r.Players[playerID] = player
 		r.ResetTimerUnsafe() // use unsafe to prevent deadlock
 
-		go r.Broadcast(JoinedMsgOf(playerID, "player joined"))
+		go r.Broadcast(JoinedMsgOf(playerID, r.GetRoomInfoUnsafe()))
 	}
 
 	go r.ListenPlayerReadySync(playerID)
@@ -152,7 +152,7 @@ func (r *Room) RejoinPlayerSync(playerID string, conn *websocket.Conn) error {
 	r.Players[playerID].Conn = conn
 	r.ResetTimerUnsafe() // use unsafe to prevent deadlock
 
-	go r.Broadcast(JoinedMsgOf(playerID, "player joined"))
+	go r.Broadcast(JoinedMsgOf(playerID, r.GetRoomInfoUnsafe()))
 	return nil
 }
 
@@ -165,7 +165,7 @@ func (r *Room) RemovePlayerSync(playerID string) error {
 	}
 	delete(r.Players, playerID)
 
-	go r.Broadcast(LeftMsgOf(playerID, "player disconnected"))
+	go r.Broadcast(LeftMsgOf(playerID, r.GetRoomInfoUnsafe()))
 
 	return nil
 }
@@ -188,10 +188,7 @@ func (r *Room) WaitAllSync() error {
 				player.Ready = true
 				numberOfReadies := r.GetNumberOfReadiesSync()
 				roomSize := r.SizeSync()
-				go r.Broadcast(ReadyMsgOf(
-					playerID,
-					fmt.Sprintf("player \"%s\" is ready (%d/%d)", playerID, numberOfReadies, roomSize),
-				))
+				go r.Broadcast(ReadyMsgOf(playerID, r.GetRoomInfoUnsafe()))
 				if numberOfReadies >= roomSize {
 					r.UnreadyAllSync()
 					return nil
@@ -210,9 +207,8 @@ func (r *Room) WaitForStartSync() error {
 	}
 
 	r.Lock()
+	defer r.Unlock()
 	r.InGame = true
-	r.Unlock()
-
-	r.Broadcast(SystemMsgOf(S_START, "all players are ready"))
+	r.Broadcast(SystemMsgOf(S_START, r.GetRoomInfoUnsafe()))
 	return nil
 }
