@@ -81,6 +81,8 @@ func (g *Game) nextTurn() {
 	g.TurnNumber++
 	g.GuesserID = g.TurnOrder[g.TurnNumber-1]
 	g.Questions = RandomQuestions(4)
+	g.UsedQuestion = ""
+	g.clearNumbers()
 	g.Room().Broadcast(GameMsgOf(G_GAME_INFO, g.GetGameInfoUnsafe()))
 
 	g.setQuestion()
@@ -94,6 +96,12 @@ func (g *Game) assignNumbers() {
 	for k, playerID := range g.TurnOrder {
 		playerNumber := numbers[k]
 		g.PlayerNumbers[playerID] = playerNumber
+	}
+}
+
+func (g *Game) clearNumbers() {
+	for _, playerID := range g.TurnOrder {
+		g.PlayerNumbers[playerID] = 0
 	}
 }
 

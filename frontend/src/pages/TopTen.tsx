@@ -158,9 +158,15 @@ function GameBoard(params: GameBoardParam) {
       {gameInfo?.numbers[playerName] ? <h2>Your Number: {gameInfo?.numbers[playerName]}</h2> : <></>}
 
       {inGame ? (
-        <button onClick={() => gameService.getSender<TopTenSender>().ready()}>Ready</button>
+        <button onClick={() => {
+          gameService.getSender<TopTenSender>().ready();
+          setLog("Waiting for others to ready");
+        }}>Ready</button>
       ) : (
-        <button onClick={() => gameService.ready()}>Start Game</button>
+        <button onClick={() => {
+          gameService.ready();
+          setLog("You are ready");
+        }}>Start Game</button>
       )}
 
       <div>{log}</div>
