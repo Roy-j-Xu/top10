@@ -30,13 +30,13 @@ func TestReadyRoom(t *testing.T) {
 
 	go room.WaitForStartSync()
 
-	wait10msAnd(func() { room.SendToReadyChannel_READY("player1") })
-	wait10msAnd(func() { room.SendToReadyChannel_READY("fake player") })
-	wait10msAnd(func() { room.SendToReadyChannel_READY("No. 2") })
-	wait10msAnd(func() { room.SendToReadyChannel_LEFT("player1") })
+	wait10msAnd(func() { room.SendToSysChannelSync_READY("player1") })
+	wait10msAnd(func() { room.SendToSysChannelSync_READY("fake player") })
+	wait10msAnd(func() { room.SendToSysChannelSync_READY("No. 2") })
+	wait10msAnd(func() { room.SendToSysChannelSync_LEFT("player1") })
 	wait10msAnd(func() { room.AddPlayerSync("player 4", nil) })
-	wait10msAnd(func() { room.SendToReadyChannel_READY("P3") })
-	wait10msAnd(func() { room.SendToReadyChannel_READY("player 4") })
+	wait10msAnd(func() { room.SendToSysChannelSync_READY("P3") })
+	wait10msAnd(func() { room.SendToSysChannelSync_READY("player 4") })
 
 	<-time.After(2 * time.Second)
 }
@@ -56,9 +56,9 @@ func TestGameDisconnect(t *testing.T) {
 	room.AddPlayerSync("2", nil)
 	room.AddPlayerSync("3", nil)
 
-	wait10msAnd(func() { room.SendToReadyChannel_READY("1") })
-	wait10msAnd(func() { room.SendToReadyChannel_READY("2") })
-	wait10msAnd(func() { room.SendToReadyChannel_READY("3") })
+	wait10msAnd(func() { room.SendToSysChannelSync_READY("1") })
+	wait10msAnd(func() { room.SendToSysChannelSync_READY("2") })
+	wait10msAnd(func() { room.SendToSysChannelSync_READY("3") })
 
 	<-time.After(500 * time.Millisecond)
 
@@ -68,7 +68,7 @@ func TestGameDisconnect(t *testing.T) {
 
 	wait10msAnd(g.Print)
 
-	wait10msAnd(func() { room.SendToReadyChannel_LEFT("1") })
+	wait10msAnd(func() { room.SendToSysChannelSync_LEFT("1") })
 	wait10msAnd(func() { room.RejoinPlayerSync("1", nil) })
 
 	wait10msAnd(g.Print)
@@ -88,9 +88,9 @@ func TestGameFlow(t *testing.T) {
 
 	go room.WaitForStartSync()
 
-	wait10msAnd(func() { room.SendToReadyChannel_READY("1") })
-	wait10msAnd(func() { room.SendToReadyChannel_READY("2") })
-	wait10msAnd(func() { room.SendToReadyChannel_READY("3") })
+	wait10msAnd(func() { room.SendToSysChannelSync_READY("1") })
+	wait10msAnd(func() { room.SendToSysChannelSync_READY("2") })
+	wait10msAnd(func() { room.SendToSysChannelSync_READY("3") })
 
 	<-time.After(500 * time.Millisecond)
 
@@ -101,7 +101,7 @@ func TestGameFlow(t *testing.T) {
 	wait10msAnd(g.Print)
 
 	guesser := g.GuesserID
-	room.SendToPlayerChannel(guesser, game.GameMsgOf(game.GP_SET_QUESTION, "12321"))
+	room.SendToPlayerChannelSync(guesser, game.GameMsgOf(game.GP_SET_QUESTION, "12321"))
 
 	wait10msAnd(g.Print)
 }

@@ -16,7 +16,7 @@ export default function Main() {
 
   const handleCreateRoom = async () => {
     try {
-      await gameService.newGame(roomName, 4, "Top10");
+      await gameService.newGame(roomName, 10, "Top10");
       navigate(`/topten/${roomName}/${playerName}`);
     } catch (error) {
       console.error(error);

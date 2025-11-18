@@ -27,6 +27,8 @@ type RoomInfo struct {
 	Game     string   `json:"game"`
 	Players  []string `json:"players"`
 	InGame   bool     `json:"inGame"`
+	Paused   bool     `json:"paused"`
+	MaxSize  int      `json:"maxSize"`
 }
 
 type playerMsgData struct {

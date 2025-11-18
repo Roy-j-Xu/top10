@@ -1,95 +1,130 @@
 package core
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"sync"
-	"top10/core/game"
 	"top10/core/room"
+
+	"github.com/gorilla/websocket"
 )
 
 type GameManager struct {
-	Rooms map[string]*room.Room
-	Games map[string]*game.Game
-	mutex sync.Mutex
+	gameRooms map[string]GameRoom
+	mutex     sync.Mutex
 }
 
 func NewGameManager() *GameManager {
 	return &GameManager{
-		Rooms: make(map[string]*room.Room),
-		Games: make(map[string]*game.Game),
+		gameRooms: make(map[string]GameRoom),
 	}
 }
 
-func (gm *GameManager) RunGame(roomName string) error {
+func (gm *GameManager) runGame(roomID string, gameName string) error {
 	gm.mutex.Lock()
-	r, ok := gm.Rooms[roomName]
-	if !ok {
-		return fmt.Errorf("running game in room %s: %w", roomName, room.ErrRoomNotFound)
+	gr, err := gm.GetGameRoomUnsafe(roomID)
+	if err != nil {
+		return fmt.Errorf("running game in room %s: %w", roomID, room.ErrRoomNotFound)
 	}
-	game := game.NewGame(r)
-	gm.Games[roomName] = game
 	gm.mutex.Unlock()
 
-	game.Start() // game starts here
+	gr.runGame(gameName)
 
-	gm.mutex.Lock()
-	delete(gm.Games, roomName)
-	gm.mutex.Unlock()
+	gm.deleteGameRoom(roomID)
 
-	log.Printf("game %s removed", roomName)
+	log.Printf("game room %s removed", roomID)
 	return nil
 }
 
-func (gm *GameManager) NewRoomSync(roomName string, roomSize int) (room.RoomInfo, error) {
+func (gm *GameManager) NewRoomSync(roomID string, maxSize int) (room.RoomInfo, error) {
 	gm.mutex.Lock()
 	defer gm.mutex.Unlock()
 
-	if _, ok := gm.Rooms[roomName]; ok {
-		return room.RoomInfo{}, fmt.Errorf("creating room %s: %w", roomName, room.ErrRoomExists)
+	if _, ok := gm.gameRooms[roomID]; ok {
+		return room.RoomInfo{}, fmt.Errorf("creating room %s: %w", roomID, room.ErrRoomExists)
 	}
 
-	rm, err := room.NewRoomWebSocket(roomName, roomSize)
+	gr, err := newGameRoom(roomID, maxSize)
 	if err != nil {
-		return room.RoomInfo{}, fmt.Errorf("creating room %s: %w", roomName, err)
+		return room.RoomInfo{}, fmt.Errorf("creating room %s: %w", roomID, err)
 	}
-	gm.Rooms[rm.ID] = rm
+	gm.gameRooms[roomID] = gr
 
-	go gm.watchRoom(rm)
+	go gm.watchGameRoom(gr)
 	go func() {
-		rm.WaitForStartSync()
-		gm.RunGame(roomName)
+		gr.Room.WaitForStartSync()
+		gm.runGame(roomID, "top10")
 	}()
 
-	return rm.GetRoomInfoUnsafe(), nil
+	return gr.Room.GetRoomInfoUnsafe(), nil
 }
 
-// deletes room when its context is done
-func (gm *GameManager) watchRoom(r *room.Room) {
-	<-r.StopCtx().Done() // wait until room stops
+// deletes game room when its context is done
+func (gm *GameManager) watchGameRoom(gr GameRoom) {
+	<-gr.Room.StopCtx().Done() // wait until room stops
 	gm.mutex.Lock()
 	defer gm.mutex.Unlock()
-	delete(gm.Rooms, r.ID)
-	log.Printf("room %s removed", r.ID)
+	delete(gm.gameRooms, gr.Room.ID)
+	log.Printf("room %s removed", gr.Room.ID)
 }
 
-func (gm *GameManager) GetRoomSync(roomID string) (*room.Room, error) {
+func (gm *GameManager) deleteGameRoom(roomID string) error {
 	gm.mutex.Lock()
 	defer gm.mutex.Unlock()
-	if r, ok := gm.Rooms[roomID]; ok {
+
+	gr, err := gm.GetGameRoomUnsafe(roomID)
+	if err != nil {
+		return err
+	}
+
+	gr.delete()
+	delete(gm.gameRooms, roomID)
+	return nil
+}
+
+func (gm *GameManager) GetGameRoomUnsafe(roomID string) (GameRoom, error) {
+	if r, ok := gm.gameRooms[roomID]; ok {
 		return r, nil
 	} else {
-		return nil, room.ErrRoomNotFound
+		return GameRoom{}, room.ErrRoomNotFound
 	}
 }
 
-func (gm *GameManager) GetGameSync(roomID string) (*game.Game, error) {
+func (gm *GameManager) GetGameRoomSync(roomID string) (GameRoom, error) {
 	gm.mutex.Lock()
 	defer gm.mutex.Unlock()
-	if r, ok := gm.Games[roomID]; ok {
+	if r, ok := gm.gameRooms[roomID]; ok {
 		return r, nil
 	} else {
-		return nil, errors.New("game not found")
+		return GameRoom{}, room.ErrRoomNotFound
 	}
+}
+
+func (gm *GameManager) GetRoomInfoSync(roomID string) (room.RoomInfo, error) {
+	r, err := gm.GetGameRoomSync(roomID)
+	if err != nil {
+		return room.RoomInfo{}, err
+	}
+	return r.Room.GetRoomInfoSync(), nil
+}
+
+func (gm *GameManager) JoinPlayerSync(roomID string, playerID string, conn *websocket.Conn) error {
+	gr, err := gm.GetGameRoomSync(roomID)
+	if err != nil {
+		return err
+	}
+
+	rm := gr.Room
+
+	if rm.PlayerExistsAndLeftSync(playerID) {
+		err = rm.RejoinPlayerSync(playerID, conn)
+	} else {
+		err = rm.AddPlayerSync(playerID, conn)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

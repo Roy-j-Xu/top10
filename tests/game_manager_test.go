@@ -10,6 +10,7 @@ import (
 	"testing"
 	"time"
 	"top10/core"
+	"top10/core/game"
 	"top10/core/room"
 	"top10/server"
 
@@ -27,11 +28,11 @@ func TestCreateRoom(t *testing.T) {
 	createRoom(t, ts, "test_room")
 
 	// Check if the room exists
-	r, err := gm.GetRoomSync("test_room")
+	gr, err := gm.GetGameRoomSync("test_room")
 	if err != nil {
 		t.Fatalf("room not found after creation: %v", err)
 	}
-	r.Print()
+	gr.Room.Print()
 
 	<-time.After(10 * time.Millisecond)
 }
@@ -57,6 +58,7 @@ func TestJoinRoom(t *testing.T) {
 }
 
 func TestReady(t *testing.T) {
+	game.LoadQuestionSet()
 	gm := core.NewGameManager()
 	server.InitServer(gm)
 	ts := httptest.NewServer(http.DefaultServeMux)
@@ -75,17 +77,17 @@ func TestReady(t *testing.T) {
 
 	<-time.After(10 * time.Millisecond)
 
-	g, err := gm.GetGameSync("test_room")
+	rInfo, err := gm.GetRoomInfoSync("test_room")
 	if err != nil {
 		t.Fatal(err)
 	}
-	t.Log(g.GetGameInfoUnsafe())
+	t.Log(rInfo)
 }
 
 func createRoom(t *testing.T, ts *httptest.Server, roomName string) {
 	body, _ := json.Marshal(map[string]any{
 		"roomName": roomName,
-		"roomSize": 4,
+		"roomSize": 10,
 	})
 	resp, err := http.Post(ts.URL+"/api/create-room", "application/json", bytes.NewReader(body))
 	if err != nil {

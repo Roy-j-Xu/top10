@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"regexp"
 	"top10/core"
-	"top10/core/room"
 
 	"github.com/gorilla/websocket"
 )
@@ -16,9 +15,7 @@ var validName = regexp.MustCompile(`^[a-zA-Z0-9_-]{1,32}$`)
 
 func handleNewRoom(gm *core.GameManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// w.Header().Set("Access-Control-Allow-Origin", "*")
-		// w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		// w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		allowAllOrigin(w)
 
 		if r.Method != http.MethodPost {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -56,9 +53,7 @@ func handleNewRoom(gm *core.GameManager) http.HandlerFunc {
 
 func handleRoomInfo(gm *core.GameManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// w.Header().Set("Access-Control-Allow-Origin", "*")
-		// w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		// w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		allowAllOrigin(w)
 
 		if r.Method != http.MethodGet {
 			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
@@ -67,49 +62,22 @@ func handleRoomInfo(gm *core.GameManager) http.HandlerFunc {
 
 		roomName := r.URL.Query().Get("roomName")
 
-		rm, err := gm.GetRoomSync(roomName)
+		rInfo, err := gm.GetRoomInfoSync(roomName)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("unable to find room \"%s\": %v", roomName, err), http.StatusBadRequest)
 			return
 		}
 
-		writeJson(w, rm.GetRoomInfoSync(), 200)
-	}
-}
-
-func handleGameInfo(gm *core.GameManager) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// w.Header().Set("Access-Control-Allow-Origin", "*")
-		// w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		// w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-
-		if r.Method != http.MethodGet {
-			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
-		roomName := r.URL.Query().Get("roomName")
-
-		g, err := gm.GetGameSync(roomName)
-		if err != nil {
-			http.Error(w,
-				fmt.Sprintf("unable to find game \"%s\" or game not in play: %v", roomName, err),
-				http.StatusBadRequest)
-			return
-		}
-
-		writeJson(w, g.GetGameInfoUnsafe(), 200)
+		writeJson(w, rInfo, 200)
 	}
 }
 
 func joinHandler(gm *core.GameManager) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// w.Header().Set("Access-Control-Allow-Origin", "*")
-		// w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		// w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		allowAllOrigin(w)
 
 		// Parse room name from query or headers
-		roomName := r.URL.Query().Get("roomName")
+		roomID := r.URL.Query().Get("roomName")
 		playerID := r.URL.Query().Get("playerName")
 
 		if !validName.MatchString(playerID) {
@@ -117,7 +85,7 @@ func joinHandler(gm *core.GameManager) http.HandlerFunc {
 			return
 		}
 
-		rm, err := gm.GetRoomSync(roomName)
+		_, err := gm.GetGameRoomSync(roomID)
 		if err != nil {
 			http.Error(w, "room not found", http.StatusNotFound)
 			return
@@ -129,12 +97,7 @@ func joinHandler(gm *core.GameManager) http.HandlerFunc {
 			return
 		}
 
-		if rm.PlayerExistsAndLeftSync(playerID) {
-			err = rm.RejoinPlayerSync(playerID, conn)
-		} else {
-			err = rm.AddPlayerSync(playerID, conn)
-		}
-
+		err = gm.JoinPlayerSync(roomID, playerID, conn)
 		if err != nil {
 			log.Println("failed to join:", err)
 			conn.WriteJSON(fmt.Sprint("failed to join", err.Error()))
@@ -142,37 +105,9 @@ func joinHandler(gm *core.GameManager) http.HandlerFunc {
 			return
 		}
 
-		go handlePlayerMessages(rm, playerID)
 	}
 }
 
 var upgrader = websocket.Upgrader{
 	CheckOrigin: func(r *http.Request) bool { return true }, // allow all origins
-}
-
-func handlePlayerMessages(r *room.Room, playerID string) {
-	player, err := r.GetPlayerSync(playerID)
-	if err != nil {
-		log.Printf("unable to listen for message from player %s: %s", playerID, err.Error())
-		return
-	}
-	log.Printf("listening for messages from player %s", playerID)
-	defer func() {
-		r.SendToReadyChannel_LEFT(playerID)
-		player.Conn.Close()
-	}()
-
-	for {
-		var msg room.Message
-		if err := player.Conn.ReadJSON(&msg); err != nil {
-			log.Println("Read error:", err)
-			return
-		}
-
-		if msg.Type == string(room.SP_READY) || msg.Type == string(room.SP_LEFT) {
-			r.SendToReadyChannel(playerID, msg)
-		} else {
-			r.SendToPlayerChannel(playerID, msg)
-		}
-	}
 }

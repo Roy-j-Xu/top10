@@ -9,9 +9,11 @@ func (r *Room) GetRoomInfoUnsafe() RoomInfo {
 	return RoomInfo{
 		RoomName: r.ID,
 		RoomSize: r.Size(),
-		Game:     "Top10",
+		Game:     r.GameName,
 		Players:  r.GetAllPlayerIDsUnsafe(),
 		InGame:   r.InGame,
+		Paused:   r.Paused,
+		MaxSize:  r.MaxSize,
 	}
 }
 
@@ -34,6 +36,10 @@ func (r *Room) SizeSync() int {
 func (r *Room) GetPlayerSync(playerID string) (*Player, error) {
 	r.Lock()
 	defer r.Unlock()
+	return r.GetPlayerUnsafe(playerID)
+}
+
+func (r *Room) GetPlayerUnsafe(playerID string) (*Player, error) {
 	if p, ok := r.Players[playerID]; ok {
 		return p, nil
 	} else {
@@ -57,6 +63,15 @@ func (r *Room) GetAllPlayerIDsUnsafe() []string {
 		ids = append(ids, id)
 	}
 	return ids
+}
+
+func (r *Room) noPlayerIsLeftUnsafe() bool {
+	for _, player := range r.Players {
+		if player.Left {
+			return false
+		}
+	}
+	return true
 }
 
 func (r *Room) GetNumberOfReadiesSync() int {
@@ -124,8 +139,10 @@ func (r *Room) ResetTimerUnsafe() {
 	}
 }
 
-func (r *Room) SendToPlayerChannel(playerID string, msg Message) error {
-	if p, err := r.GetPlayerSync(playerID); err == nil {
+func (r *Room) SendToPlayerChannelSync(playerID string, msg Message) error {
+	r.Lock()
+	defer r.Unlock()
+	if p, err := r.GetPlayerUnsafe(playerID); err == nil {
 		p.msgChan <- msg
 		return nil
 	} else {
@@ -133,21 +150,23 @@ func (r *Room) SendToPlayerChannel(playerID string, msg Message) error {
 	}
 }
 
-func (r *Room) SendToReadyChannel(playerID string, msg Message) error {
-	if p, err := r.GetPlayerSync(playerID); err == nil {
-		p.readyChan <- msg
+func (r *Room) SendToSysChannelSync(playerID string, msg Message) error {
+	r.Lock()
+	defer r.Unlock()
+	if p, err := r.GetPlayerUnsafe(playerID); err == nil {
+		p.sysChan <- msg
 		return nil
 	} else {
 		return ErrPlayerNotFound
 	}
 }
 
-func (r *Room) SendToReadyChannel_READY(playerID string) error {
-	return r.SendToReadyChannel(playerID, SystemMsgOf(SP_READY, "player ready"))
+func (r *Room) SendToSysChannelSync_READY(playerID string) error {
+	return r.SendToSysChannelSync(playerID, SystemMsgOf(SP_READY, "player ready"))
 }
 
-func (r *Room) SendToReadyChannel_LEFT(playerID string) error {
-	r.SendToReadyChannel(playerID, SystemMsgOf(SP_LEFT, "player left or hang up"))
+func (r *Room) SendToSysChannelSync_LEFT(playerID string) error {
+	r.SendToSysChannelSync(playerID, SystemMsgOf(SP_LEFT, "player left or hang up"))
 	return nil
 }
 
@@ -173,6 +192,7 @@ func (r *Room) Print() {
 	log.Println("----------")
 	log.Println("Room ID: ", r.ID)
 	log.Println("InGame: ", r.InGame)
+	log.Println("Paused: ", r.Paused)
 	log.Println("Max Size: ", r.MaxSize)
 	log.Println("Players: ")
 	for id, p := range r.Players {
